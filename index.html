@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
   <style>
-    /* Reset & Clean Tap Highlight (Menghilangkan bayangan biru saat tombol dipencet) */
+    /* Reset & Clean Tap Highlight (Tanpa bayangan biru saat dipencet) */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -80,8 +80,8 @@
       transform: scale(0.96);
     }
 
-    /* Setup Username Modal / Screen */
-    #setup-modal {
+    /* Setup Username Modal */
+    #setup-modal, #status-add-modal {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.95);
@@ -214,7 +214,7 @@
       flex: 1;
       overflow-y: auto;
     }
-    .user-item {
+    .user-item, .status-user-item {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -223,7 +223,7 @@
       border-bottom: 1px solid #334155;
       transition: background 0.2s;
     }
-    .user-item:hover {
+    .user-item:hover, .status-user-item:hover {
       background: #334155;
     }
 
@@ -337,16 +337,7 @@
       padding: 8px;
     }
 
-    /* Status Item */
-    .status-item {
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid #334155;
-    }
-
-    /* Settings Side Overlay */
+    /* Settings Side Drawer */
     #settings-drawer {
       position: fixed;
       top: 0;
@@ -366,10 +357,31 @@
       left: 0;
     }
 
-    /* Video player in status */
-    video {
-      max-width: 100%;
-      border-radius: 8px;
+    /* Status Viewer Overlay */
+    #status-viewer-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 210;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .status-video-box {
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .status-video-box video {
+      width: 100%;
+      max-height: 65vh;
+      border-radius: 12px;
+      background: #000;
     }
   </style>
 </head>
@@ -392,6 +404,27 @@
       <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Username unik untuk profil Anda.</p>
       <input type="text" id="input-username" class="input-field" placeholder="contoh: alex_99">
       <button class="btn-primary" id="btn-save-username">Simpan & Lanjutkan</button>
+    </div>
+  </div>
+
+  <!-- ADD STATUS MODAL (LINK DIRECT) -->
+  <div id="status-add-modal">
+    <div class="modal-box">
+      <h3>Tambah Status Video</h3>
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Masukkan Link Direct Video (berakhiran .mp4, dari Catbox.moe / hosting lain)</p>
+      <input type="text" id="input-status-url" class="input-field" placeholder="https://files.catbox.moe/xxxxxx.mp4">
+      <div style="display:flex; gap:10px;">
+        <button class="btn-primary" style="background:#64748b;" onclick="closeAddStatusModal()">Batal</button>
+        <button class="btn-primary" id="btn-submit-status">Kirim Status</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS VIEWER MODAL -->
+  <div id="status-viewer-modal">
+    <button class="icon-btn" style="position:absolute; top:20px; right:20px; font-size:1.5rem;" onclick="closeStatusViewer()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="status-video-box" id="status-viewer-content">
+      <!-- Diisi dinamis via JS -->
     </div>
   </div>
 
@@ -427,12 +460,13 @@
       <!-- TAB STATUS -->
       <div id="tab-status" class="status-list" style="display: none;">
         <div style="padding: 16px;">
-          <input type="file" id="status-video-input" accept="video/*" style="display: none;">
-          <button class="btn-primary" onclick="document.getElementById('status-video-input').click()">
-            <i class="fa-solid fa-plus"></i> Tambah Status Video
+          <button class="btn-primary" onclick="openAddStatusModal()">
+            <i class="fa-solid fa-plus"></i> Tambah Status Video (Link Direct)
           </button>
         </div>
-        <div id="status-container"></div>
+        <div id="status-users-list">
+          <!-- Daftar pengguna yang punya status muncul di sini -->
+        </div>
       </div>
     </div>
 
@@ -513,7 +547,7 @@
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { 
       getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, query, 
-      where, orderBy, onSnapshot, deleteDoc, serverTimestamp 
+      orderBy, onSnapshot, deleteDoc, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     // Configuration Firebase Anda
@@ -566,12 +600,10 @@
         document.getElementById('login-screen').classList.remove('active');
         document.getElementById('app-screen').classList.add('active');
 
-        // Sync & Fetch User Doc
         const userRef = doc(db, "users", user.uid);
         const snap = await getDoc(userRef);
 
         if (!snap.exists()) {
-          // User Baru
           document.getElementById('setup-modal').style.display = 'flex';
         } else {
           currentUserDoc = snap.data();
@@ -584,7 +616,6 @@
       }
     });
 
-    // Save initial Username
     document.getElementById('btn-save-username').addEventListener('click', async () => {
       const username = document.getElementById('input-username').value.trim();
       if (!username) return alert("Username wajib diisi!");
@@ -606,26 +637,21 @@
       initApp();
     });
 
-    // Handle Tab Window Unload (Offline Status)
     window.addEventListener('beforeunload', () => {
       if (currentUser) {
         updateDoc(doc(db, "users", currentUser.uid), { isOnline: false });
       }
     });
 
-    // --- INITIALIZE APP AFTER LOGIN ---
     function initApp() {
-      // Set Profile UI
       document.getElementById('my-name').textContent = currentUserDoc.name;
       document.getElementById('my-username-display').textContent = '@' + currentUserDoc.username;
       document.getElementById('my-avatar').src = currentUserDoc.photoURL;
 
-      // Settings Fields
       document.getElementById('setting-avatar-preview').src = currentUserDoc.photoURL;
       document.getElementById('setting-username').value = currentUserDoc.username;
       document.getElementById('setting-bio').value = currentUserDoc.bio || '';
 
-      // Check 7 Days Username Restriction
       const lastChange = currentUserDoc.lastUsernameChange || 0;
       const daysPassed = (Date.now() - lastChange) / (1000 * 60 * 60 * 24);
       if (daysPassed < 7) {
@@ -637,7 +663,7 @@
       listenStatusUpdates();
     }
 
-    // --- LOAD USER LIST (REALTIME) ---
+    // --- LOAD USER LIST ---
     function loadUsersList() {
       onSnapshot(collection(db, "users"), (snapshot) => {
         const userListContainer = document.getElementById('tab-chats');
@@ -645,7 +671,7 @@
 
         snapshot.forEach((docSnap) => {
           const u = docSnap.data();
-          if (u.uid === currentUser.uid) return; // Skip self
+          if (u.uid === currentUser.uid) return;
 
           const div = document.createElement('div');
           div.className = 'user-item';
@@ -665,14 +691,13 @@
       });
     }
 
-    // --- OPEN CHAT WITH SELECTED USER ---
+    // --- OPEN CHAT ---
     let chatUnsubscribe = null;
     let typingUnsubscribe = null;
 
     window.openChatWith = function(targetUser) {
       activeChatUser = targetUser;
       
-      // Update UI Header
       document.getElementById('active-chat-name').textContent = targetUser.name;
       document.getElementById('active-chat-avatar').src = targetUser.photoURL;
       document.getElementById('active-chat-status').className = `status-dot ${targetUser.isOnline ? 'online' : 'offline'}`;
@@ -681,13 +706,11 @@
       document.getElementById('chat-input').disabled = false;
       document.getElementById('btn-send-msg').disabled = false;
 
-      // Responsive mobile toggle
       if (window.innerWidth <= 768) {
         document.getElementById('chat-area').classList.add('active-mobile');
         document.getElementById('btn-back-sidebar').style.display = 'block';
       }
 
-      // Load Messages Realtime
       const chatId = getChatId(currentUser.uid, targetUser.uid);
       
       if (chatUnsubscribe) chatUnsubscribe();
@@ -701,7 +724,6 @@
           const msg = docSnap.data();
           const isMe = msg.senderId === currentUser.uid;
 
-          // Auto-mark as read
           if (!isMe && !msg.read) {
             updateDoc(doc(db, "chats", chatId, "messages", docSnap.id), { read: true });
           }
@@ -709,7 +731,6 @@
           const msgDiv = document.createElement('div');
           msgDiv.className = `msg ${isMe ? 'sent' : 'received'}`;
 
-          // Format Text
           let contentHtml = '';
           if (msg.type === 'audio') {
             contentHtml = `<audio controls src="${msg.mediaUrl}"></audio>`;
@@ -734,7 +755,6 @@
         container.scrollTop = container.scrollHeight;
       });
 
-      // Listen Typing Status
       if (typingUnsubscribe) typingUnsubscribe();
       typingUnsubscribe = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
         if (docSnap.exists()) {
@@ -757,9 +777,7 @@
       return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
     }
 
-    // --- SEND MESSAGE & TYPING EVENT ---
     const chatInput = document.getElementById('chat-input');
-    
     chatInput.addEventListener('input', () => {
       if (!activeChatUser) return;
       const chatId = getChatId(currentUser.uid, activeChatUser.uid);
@@ -794,20 +812,18 @@
       setDoc(doc(db, "chats", chatId), { typing: false }, { merge: true });
     }
 
-    // --- DELETE MESSAGE ---
     window.deleteMessage = async function(chatId, msgId) {
       if (confirm("Hapus pesan ini?")) {
         await deleteDoc(doc(db, "chats", chatId, "messages", msgId));
       }
     };
 
-    // --- VOICE NOTE (RECORDING) ---
+    // --- VOICE NOTE ---
     const btnRecord = document.getElementById('btn-record-vn');
     btnRecord.addEventListener('click', async () => {
       if (!activeChatUser) return alert("Pilih lawan bicara terlebih dahulu!");
 
       if (!isRecording) {
-        // Start Recording
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           mediaRecorder = new MediaRecorder(stream);
@@ -838,27 +854,168 @@
           alert("Izin mikrofon ditolak atau tidak didukung!");
         }
       } else {
-        // Stop Recording
         mediaRecorder.stop();
         isRecording = false;
         btnRecord.style.color = '#38bdf8';
       }
     });
 
-    // --- CUSTOM TEXT FORMATTING & LINK DETECTION ---
+    // --- FORMATTING TEXT & LINKS ---
     function formatMarkdownAndLinks(text) {
       let formatted = text
-        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") // Escape HTML
-        .replace(/\*(.*?)\*/g, '<b>$1</b>')         // *tebal*
-        .replace(/_(.*?)_/g, '<i>$1</i>')          // _miring_
-        .replace(/~(.*?)~/g, '<s>$1</s>')          // ~garis~
-        .replace(/\^(.*?)\^/g, '<small>$1</small>'); // ^kecil^
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/\*(.*?)\*/g, '<b>$1</b>')
+        .replace(/_(.*?)_/g, '<i>$1</i>')
+        .replace(/~(.*?)~/g, '<s>$1</s>')
+        .replace(/\^(.*?)\^/g, '<small>$1</small>');
 
-      // Detect Links
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       formatted = formatted.replace(urlRegex, (url) => `<a href="${url}" target="_blank">${url}</a>`);
       return formatted;
     }
+
+    // --- STATUS SYSTEM (DIRECT LINK & MULTI-VIDEO PER USER) ---
+    window.openAddStatusModal = function() {
+      document.getElementById('status-add-modal').style.display = 'flex';
+    };
+    window.closeAddStatusModal = function() {
+      document.getElementById('status-add-modal').style.display = 'none';
+      document.getElementById('input-status-url').value = '';
+    };
+
+    document.getElementById('btn-submit-status').addEventListener('click', async () => {
+      const url = document.getElementById('input-status-url').value.trim();
+      if (!url) return alert("Masukkan link direct video!");
+
+      try {
+        const userStatusRef = doc(db, "statuses", currentUser.uid);
+        const snap = await getDoc(userStatusRef);
+        
+        let videos = [];
+        if (snap.exists()) {
+          videos = snap.data().videos || [];
+        }
+
+        // Tambah video baru ke array milik user ini
+        videos.push({
+          url: url,
+          timestamp: Date.now()
+        });
+
+        await setDoc(userStatusRef, {
+          uid: currentUser.uid,
+          userName: currentUserDoc.name,
+          userPhoto: currentUserDoc.photoURL,
+          videos: videos
+        });
+
+        alert("Status video berhasil ditambahkan!");
+        closeAddStatusModal();
+      } catch (err) {
+        alert("Gagal menambah status: " + err.message);
+      }
+    });
+
+    function listenStatusUpdates() {
+      onSnapshot(collection(db, "statuses"), (snapshot) => {
+        const container = document.getElementById('status-users-list');
+        container.innerHTML = '';
+
+        let hasStatus = false;
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (!data.videos || data.videos.length === 0) return;
+          hasStatus = true;
+
+          const div = document.createElement('div');
+          div.className = 'status-user-item';
+          div.onclick = () => openStatusViewer(data);
+          div.innerHTML = `
+            <img class="avatar" src="${data.userPhoto}">
+            <div>
+              <div style="font-weight:600; font-size:0.95rem;">${data.userName}</div>
+              <div style="font-size:0.75rem; color:#94a3b8;">${data.videos.length} video status</div>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+
+        if (!hasStatus) {
+          container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Belum ada status dari pengguna lain.</div>`;
+        }
+      });
+    }
+
+    let currentViewerVideos = [];
+    let currentViewerIndex = 0;
+    let viewingOwnerUid = null;
+
+    window.openStatusViewer = function(statusData) {
+      currentViewerVideos = statusData.videos;
+      currentViewerIndex = 0;
+      viewingOwnerUid = statusData.uid;
+
+      document.getElementById('status-viewer-modal').style.display = 'flex';
+      renderCurrentStatusVideo();
+    };
+
+    window.closeStatusViewer = function() {
+      document.getElementById('status-viewer-modal').style.display = 'none';
+      document.getElementById('status-viewer-content').innerHTML = '';
+    };
+
+    window.renderCurrentStatusVideo = function() {
+      const contentBox = document.getElementById('status-viewer-content');
+      const v = currentViewerVideos[currentViewerIndex];
+      const isMyStatus = viewingOwnerUid === currentUser.uid;
+
+      contentBox.innerHTML = `
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; justify-content:flex-start;">
+          <span style="font-size:0.85rem; color:#94a3b8;">Video ${currentViewerIndex + 1} dari ${currentViewerVideos.length}</span>
+        </div>
+        <video src="${v.url}" controls autoplay></video>
+        <div style="display:flex; justify-content:space-between; margin-top:12px; align-items:center;">
+          <button class="btn-primary" style="width:auto; padding:8px 16px; background:${currentViewerIndex > 0 ? '#0284c7' : '#334155'}" ${currentViewerIndex === 0 ? 'disabled' : ''} onclick="prevStatusVideo()">Sebelumnya</button>
+          
+          ${isMyStatus ? `<button class="btn-primary" style="width:auto; padding:8px 16px; background:#ef4444;" onclick="deleteThisStatusVideo(${currentViewerIndex})">Hapus Video Ini</button>` : ''}
+          
+          <button class="btn-primary" style="width:auto; padding:8px 16px; background:${currentViewerIndex < currentViewerVideos.length - 1 ? '#0284c7' : '#334155'}" ${currentViewerIndex === currentViewerVideos.length - 1 ? 'disabled' : ''} onclick="nextStatusVideo()">Selanjutnya</button>
+        </div>
+      `;
+    };
+
+    window.nextStatusVideo = function() {
+      if (currentViewerIndex < currentViewerVideos.length - 1) {
+        currentViewerIndex++;
+        renderCurrentStatusVideo();
+      }
+    };
+
+    window.prevStatusVideo = function() {
+      if (currentViewerIndex > 0) {
+        currentViewerIndex--;
+        renderCurrentStatusVideo();
+      }
+    };
+
+    window.deleteThisStatusVideo = async function(index) {
+      if (!confirm("Hapus video status ini secara permanen?")) return;
+
+      currentViewerVideos.splice(index, 1);
+      const userStatusRef = doc(db, "statuses", currentUser.uid);
+
+      if (currentViewerVideos.length === 0) {
+        await deleteDoc(userStatusRef);
+        closeStatusViewer();
+      } else {
+        await updateDoc(userStatusRef, { videos: currentViewerVideos });
+        if (currentViewerIndex >= currentViewerVideos.length) {
+          currentViewerIndex = currentViewerVideos.length - 1;
+        }
+        renderCurrentStatusVideo();
+      }
+      alert("Status video berhasil dihapus!");
+    };
 
     // --- SETTINGS & PROFILE CROPPER ---
     window.toggleSettings = function() {
@@ -887,7 +1044,7 @@
 
     document.getElementById('btn-crop-done').addEventListener('click', () => {
       const canvas = cropper.getCroppedCanvas({ width: 200, height: 200 });
-      const base64Image = canvas.toDataURL('image/jpeg', 0.7); // Compress JPEG base64
+      const base64Image = canvas.toDataURL('image/jpeg', 0.7);
       document.getElementById('setting-avatar-preview').src = base64Image;
       document.getElementById('crop-modal').style.display = 'none';
     });
@@ -911,53 +1068,6 @@
       alert("Profil berhasil diperbarui!");
       location.reload();
     });
-
-    // --- STATUS VIDEO (BASE64 FIRESTORE) ---
-    document.getElementById('status-video-input').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (file.size > 10 * 1024 * 1024) { // Limit 10MB Base64
-        return alert("Ukuran video terlalu besar! Maksimal 10MB.");
-      }
-
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64Video = reader.result;
-        await addDoc(collection(db, "statuses"), {
-          uid: currentUser.uid,
-          userName: currentUserDoc.name,
-          userPhoto: currentUserDoc.photoURL,
-          videoUrl: base64Video,
-          timestamp: serverTimestamp()
-        });
-        alert("Status Video Berhasil Diunggah!");
-      };
-      reader.readAsDataURL(file);
-    });
-
-    function listenStatusUpdates() {
-      onSnapshot(query(collection(db, "statuses"), orderBy("timestamp", "desc")), (snapshot) => {
-        const container = document.getElementById('status-container');
-        container.innerHTML = '';
-
-        snapshot.forEach((docSnap) => {
-          const st = docSnap.data();
-          const div = document.createElement('div');
-          div.className = 'status-item';
-          div.innerHTML = `
-            <div style="width:100%;">
-              <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                <img class="avatar" src="${st.userPhoto}">
-                <span style="font-weight:600; font-size:0.9rem;">${st.userName}</span>
-              </div>
-              <video src="${st.videoUrl}" controls></video>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-      });
-    }
 
     // Tab Switcher
     window.switchTab = function(tab) {
