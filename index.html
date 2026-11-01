@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chatingses</title>
   
-  <!-- Font Awesome & Google Fonts -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Cropper.js for Avatar Cropping -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
   <style>
-    /* Reset & Clean Tap Highlight */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -41,7 +38,6 @@
       display: flex;
     }
 
-    /* Login Screen */
     #login-screen {
       flex-direction: column;
       justify-content: center;
@@ -73,14 +69,9 @@
       align-items: center;
       gap: 12px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      transition: transform 0.1s ease;
-    }
-    .btn-google:active {
-      transform: scale(0.96);
     }
 
-    /* Modals */
-    #setup-modal, #status-add-modal, #viewers-list-modal {
+    #setup-modal, #status-add-modal, #viewers-list-modal, #add-friend-modal, #create-group-modal {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.95);
@@ -98,6 +89,8 @@
       width: 100%;
       max-width: 400px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      max-height: 85vh;
+      overflow-y: auto;
     }
     .input-field {
       width: 100%;
@@ -107,8 +100,8 @@
       border-radius: 8px;
       color: #fff;
       font-size: 1rem;
-      margin-top: 12px;
-      margin-bottom: 20px;
+      margin-top: 10px;
+      margin-bottom: 16px;
     }
     .btn-primary {
       width: 100%;
@@ -119,9 +112,7 @@
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s;
     }
-    .btn-primary:active { opacity: 0.8; }
 
     .custom-file-upload {
       display: flex;
@@ -135,12 +126,10 @@
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      margin-top: 12px;
+      margin-top: 8px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
     }
 
-    /* Main App Layout */
     #app-screen {
       width: 100%;
       height: 100%;
@@ -220,6 +209,7 @@
       cursor: pointer;
       font-weight: 600;
       border-bottom: 2px solid transparent;
+      font-size: 0.85rem;
     }
     .tab-btn.active {
       color: #38bdf8;
@@ -312,9 +302,7 @@
       font-size: 0.75rem;
       opacity: 0.8;
     }
-    .msg:hover .msg-actions {
-      display: block;
-    }
+    .msg:hover .msg-actions { display: block; }
 
     .msg b { font-weight: 700; }
     .msg i { font-style: italic; }
@@ -372,9 +360,7 @@
       border-right: 1px solid #334155;
       overflow-y: auto;
     }
-    #settings-drawer.open {
-      left: 0;
-    }
+    #settings-drawer.open { left: 0; }
 
     /* Status Viewer Modal */
     #status-viewer-modal {
@@ -393,7 +379,7 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
     .status-viewer-header {
       display: flex;
@@ -412,11 +398,11 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      max-height: 55vh;
+      max-height: 50vh;
     }
     .status-video-wrapper video {
       width: 100%;
-      max-height: 55vh;
+      max-height: 50vh;
       object-fit: contain;
       pointer-events: none;
     }
@@ -437,12 +423,29 @@
 
     .status-caption-box {
       background: rgba(15, 23, 42, 0.85);
-      padding: 10px 14px;
+      padding: 8px 12px;
       border-radius: 8px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #f8fafc;
       text-align: center;
       word-break: break-word;
+    }
+
+    .status-reply-bar {
+      display: flex;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 8px;
+      border-radius: 12px;
+    }
+    .status-reply-bar input {
+      flex: 1;
+      padding: 8px 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.9rem;
     }
 
     .status-viewer-footer {
@@ -450,7 +453,7 @@
       justify-content: space-between;
       align-items: center;
       background: rgba(15, 23, 42, 0.8);
-      padding: 12px 16px;
+      padding: 10px 16px;
       border-radius: 12px;
     }
     .status-action-btn {
@@ -465,10 +468,7 @@
       align-items: center;
       gap: 6px;
     }
-    .status-action-btn.delete {
-      background: #ef4444;
-      border-color: #dc2626;
-    }
+    .status-action-btn.delete { background: #ef4444; border-color: #dc2626; }
   </style>
 </head>
 <body>
@@ -493,15 +493,41 @@
     </div>
   </div>
 
+  <!-- ADD FRIEND MODAL -->
+  <div id="add-friend-modal">
+    <div class="modal-box">
+      <h3>Tambah Teman</h3>
+      <input type="text" id="search-friend-input" class="input-field" placeholder="Masukkan username tujuan...">
+      <button class="btn-primary" onclick="searchUserForFriend()">Cari Pengguna</button>
+      <div id="search-friend-result" style="margin-top:16px;"></div>
+      <button class="btn-primary" style="background:#64748b; margin-top:12px;" onclick="closeAddFriendModal()">Tutup</button>
+    </div>
+  </div>
+
+  <!-- CREATE GROUP MODAL -->
+  <div id="create-group-modal">
+    <div class="modal-box">
+      <h3>Buat Grup Baru</h3>
+      <input type="text" id="group-name-input" class="input-field" placeholder="Nama Grup...">
+      <input type="text" id="group-desc-input" class="input-field" placeholder="Deskripsi Grup...">
+      <p style="font-size:0.85rem; color:#94a3b8; margin-top:8px;">Pilih Anggota Teman:</p>
+      <div id="group-friends-checkboxes" style="max-height:150px; overflow-y:auto; margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button class="btn-primary" style="background:#64748b;" onclick="closeCreateGroupModal()">Batal</button>
+        <button class="btn-primary" onclick="submitCreateGroup()">Buat Grup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ADD STATUS MODAL -->
   <div id="status-add-modal">
     <div class="modal-box">
       <h3>Tambah Status Video</h3>
-      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Pilih video MP4 dari galeri Anda</p>
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Pilih video dari HP Anda (tersimpan lokal)</p>
       
       <label class="custom-file-upload">
-        <i class="fa-solid fa-video"></i> <span id="status-file-label">Pilih Video dari Galeri</span>
-        <input type="file" id="input-status-file" accept="video/mp4,video/*" style="display:none;">
+        <i class="fa-solid fa-video"></i> <span id="status-file-label">Pilih Video Galeri</span>
+        <input type="file" id="input-status-file" accept="video/*" style="display:none;">
       </label>
 
       <input type="text" id="input-status-caption" class="input-field" placeholder="Tulis deskripsi / caption status..." style="margin-top:4px; margin-bottom:16px;">
@@ -546,6 +572,12 @@
 
       <div id="status-caption-display" class="status-caption-box" style="display:none;"></div>
 
+      <!-- Balas Status (Ketik pesan ke status orang) -->
+      <div class="status-reply-bar" id="status-reply-container">
+        <input type="text" id="status-reply-input" placeholder="Balas status...">
+        <button class="icon-btn" onclick="sendReplyStatus()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+
       <div class="status-viewer-footer">
         <button class="status-action-btn" id="btn-like-status" onclick="toggleLikeStatus()">
           <i id="like-icon" class="fa-regular fa-heart" style="color:#ef4444;"></i> <span id="like-count">0</span>
@@ -584,15 +616,22 @@
 
       <div class="nav-tabs">
         <button class="tab-btn active" id="tab-chats-btn" onclick="switchTab('chats')">Obrolan</button>
+        <button class="tab-btn" id="tab-requests-btn" onclick="switchTab('requests')">Permintaan</button>
         <button class="tab-btn" id="tab-status-btn" onclick="switchTab('status')">Status</button>
       </div>
 
-      <!-- TAB CHATS -->
+      <!-- TAB CHATS & GROUPS -->
       <div id="tab-chats" class="user-list" style="display:flex; flex-direction:column;">
-        <div style="padding: 10px 16px; border-bottom: 1px solid #334155;">
-          <input type="text" id="search-user-input" class="input-field" style="margin: 0; padding: 8px 12px; font-size: 0.9rem;" placeholder="Cari nama atau username...">
+        <div style="padding: 10px 16px; display:flex; gap:8px; border-bottom: 1px solid #334155;">
+          <button class="btn-primary" style="font-size:0.8rem; padding:8px;" onclick="openAddFriendModal()"><i class="fa-solid fa-user-plus"></i> Tambah Teman</button>
+          <button class="btn-primary" style="font-size:0.8rem; padding:8px; background:#10b981;" onclick="openCreateGroupModal()"><i class="fa-solid fa-users"></i> Buat Grup</button>
         </div>
-        <div id="user-list-container" style="flex:1; overflow-y:auto;"></div>
+        <div id="chat-list-container" style="flex:1; overflow-y:auto;"></div>
+      </div>
+
+      <!-- TAB REQUESTS PERTEMANAN -->
+      <div id="tab-requests" class="user-list" style="display:none;">
+        <div id="friend-requests-container" style="padding:10px;"></div>
       </div>
 
       <!-- TAB STATUS -->
@@ -616,16 +655,17 @@
             <div id="active-chat-status" class="status-dot offline"></div>
           </div>
           <div>
-            <div id="active-chat-name" style="font-weight:600;">Pilih Pengguna</div>
-            <div id="active-chat-info" style="font-size:0.75rem; color:#94a3b8;">Offline</div>
+            <div id="active-chat-name" style="font-weight:600;">Pilih Obrolan</div>
+            <div id="active-chat-info" style="font-size:0.75rem; color:#94a3b8;">-</div>
           </div>
         </div>
         
         <div style="position:relative;">
           <button class="icon-btn" onclick="toggleChatMenu()"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-          <div id="chat-dropdown-menu" style="display:none; position:absolute; right:0; top:35px; background:#1e293b; border:1px solid #334155; border-radius:8px; width:180px; z-index:60; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+          <div id="chat-dropdown-menu" style="display:none; position:absolute; right:0; top:35px; background:#1e293b; border:1px solid #334155; border-radius:8px; width:200px; z-index:60; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
             <div style="padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid #334155;" onclick="clearChatHistory()">Hapus History Chat</div>
             <div style="padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid #334155;" onclick="clearChatEveryone()">Hapus Chat Semua Orang</div>
+            <div id="group-settings-option" style="display:none; padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid #334155; color:#38bdf8;" onclick="openGroupSettingsModal()">Pengaturan Grup</div>
             <div id="block-menu-btn" style="padding:10px 14px; font-size:0.85rem; cursor:pointer; color:#ef4444;" onclick="toggleBlockUser()">Blokir Pengguna</div>
           </div>
         </div>
@@ -635,7 +675,7 @@
 
       <div class="typing-indicator" id="typing-indicator"></div>
 
-      <div class="chat-input-bar">
+      <div class="chat-input-bar" id="chat-input-bar-container">
         <input type="file" id="chat-image-input" accept="image/*" style="display:none;">
         <button class="icon-btn" onclick="document.getElementById('chat-image-input').click()" title="Kirim Foto"><i class="fa-regular fa-image"></i></button>
         
@@ -645,6 +685,15 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- GROUP SETTINGS MODAL -->
+  <div id="group-settings-modal" style="position:fixed; inset:0; background:rgba(15,23,42,0.95); z-index:100; display:none; flex-direction:column; justify-content:center; align-items:center; padding:20px;">
+    <div class="modal-box">
+      <h3>Pengaturan Grup</h3>
+      <div id="group-settings-content" style="margin-top:12px; display:flex; flex-direction:column; gap:12px;"></div>
+      <button class="btn-primary" style="margin-top:16px; background:#64748b;" onclick="closeGroupSettingsModal()">Tutup</button>
+    </div>
   </div>
 
   <!-- 4. SETTINGS DRAWER -->
@@ -672,7 +721,6 @@
       <input type="text" id="setting-bio" class="input-field" placeholder="Sedang sibuk...">
     </div>
 
-    <!-- DAFTAR PENGGUNA YANG DIBLOKIR -->
     <div style="margin-top: 10px;">
       <label style="font-size:0.8rem; color:#38bdf8; font-weight:600;">Pengguna yang Diblokir</label>
       <div id="blocked-users-list" style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;">
@@ -692,7 +740,6 @@
     <button class="btn-primary" id="btn-crop-done" style="margin-top:15px; width:200px;">Potong & Simpan</button>
   </div>
 
-  <!-- Cropper JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
   <!-- FIREBASE MODULES -->
@@ -723,7 +770,8 @@
 
     let currentUser = null;
     let currentUserDoc = null;
-    let activeChatUser = null;
+    let activeChatTarget = null; // Bisa user object atau group object
+    let activeChatType = 'private'; // 'private' atau 'group'
     let cropper = null;
     let mediaRecorder = null;
     let audioChunks = [];
@@ -732,6 +780,7 @@
     let selectedStatusFile = null;
     let heartbeatInterval = null;
     let allUsersCache = [];
+    let myFriendsCache = [];
 
     // --- AUTHENTICATION ---
     document.getElementById('btn-login-google').addEventListener('click', async () => {
@@ -792,7 +841,7 @@
     }
 
     document.getElementById('btn-save-username').addEventListener('click', async () => {
-      const username = document.getElementById('input-username').value.trim();
+      const username = document.getElementById('input-username').value.trim().toLowerCase();
       if (!username) return alert("Username wajib diisi!");
 
       const userRef = doc(db, "users", currentUser.uid);
@@ -801,10 +850,12 @@
         name: currentUser.displayName,
         email: currentUser.email,
         photoURL: currentUser.photoURL || 'https://via.placeholder.com/150',
-        username: username.toLowerCase(),
+        username: username,
         bio: 'Hai! Saya menggunakan Chatingses.',
         isOnline: true,
         lastActive: serverTimestamp(),
+        friends: [],
+        friendRequests: [],
         blocked: [],
         lastUsernameChange: Date.now()
       };
@@ -837,122 +888,275 @@
         document.getElementById('username-change-info').textContent = `Dapat diganti lagi dalam ${Math.ceil(7 - daysPassed)} hari.`;
       }
 
-      loadUsersList();
+      loadUsersAndFriends();
       listenStatusUpdates();
+      listenFriendRequests();
       renderBlockedUsersList();
     }
 
-    // --- LOAD USER LIST & BLOCKED MANAGEMENT ---
-    function loadUsersList() {
+    // --- USERS & FRIENDS DATA CACHE ---
+    function loadUsersAndFriends() {
       onSnapshot(collection(db, "users"), (snapshot) => {
         allUsersCache = [];
         snapshot.forEach((docSnap) => {
-          allUsersCache.push(docSnap.data());
+          const u = docSnap.data();
+          if (u.uid === currentUser.uid) {
+            currentUserDoc = u; // Refresh local user doc
+          }
+          allUsersCache.push(u);
         });
-        renderUserListView();
-        renderBlockedUsersList();
+        renderChatList();
       });
     }
 
-    document.getElementById('search-user-input').addEventListener('input', () => {
-      renderUserListView();
-    });
-
-    function renderUserListView() {
-      const container = document.getElementById('user-list-container');
-      container.innerHTML = '';
-      const searchText = document.getElementById('search-user-input').value.toLowerCase();
-      const now = Date.now();
-
-      const filtered = allUsersCache.filter(u => {
-        if (u.uid === currentUser.uid) return false;
-        const myBlocked = currentUserDoc.blocked || [];
-        const theirBlocked = u.blocked || [];
-        if (myBlocked.includes(u.uid) || theirBlocked.includes(currentUser.uid)) return false;
-
-        return u.name.toLowerCase().includes(searchText) || u.username.toLowerCase().includes(searchText);
-      });
-
-      filtered.sort((a, b) => {
-        const aTime = a.lastActive ? a.lastActive.toMillis() : 0;
-        const bTime = b.lastActive ? b.lastActive.toMillis() : 0;
-        const aOnline = a.isOnline && (now - aTime < 45000);
-        const bOnline = b.isOnline && (now - bTime < 45000);
-
-        if (aOnline === bOnline) {
-          return a.name.localeCompare(b.name);
+    function listenFriendRequests() {
+      onSnapshot(doc(db, "users", currentUser.uid), (docSnap) => {
+        if (docSnap.exists()) {
+          currentUserDoc = docSnap.data();
+          renderFriendRequests();
+          renderChatList();
         }
-        return aOnline ? -1 : 1;
+      });
+    }
+
+    // --- ADD FRIEND SYSTEM ---
+    window.openAddFriendModal = function() {
+      document.getElementById('add-friend-modal').style.display = 'flex';
+      document.getElementById('search-friend-input').value = '';
+      document.getElementById('search-friend-result').innerHTML = '';
+    };
+    window.closeAddFriendModal = function() {
+      document.getElementById('add-friend-modal').style.display = 'none';
+    };
+
+    window.searchUserForFriend = async function() {
+      const queryUser = document.getElementById('search-friend-input').value.trim().toLowerCase();
+      const resultBox = document.getElementById('search-friend-result');
+      if (!queryUser) return;
+
+      const qSnap = await getDocs(collection(db, "users"));
+      let foundUser = null;
+      qSnap.forEach(d => {
+        const data = d.data();
+        if (data.username === queryUser && data.uid !== currentUser.uid) {
+          foundUser = data;
+        }
       });
 
-      if (filtered.length === 0) {
-        container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Tidak ada pengguna ditemukan.</div>`;
+      if (!foundUser) {
+        resultBox.innerHTML = `<p style="color:#ef4444; font-size:0.9rem; text-align:center;">Pengguna tidak ditemukan.</p>`;
         return;
       }
 
-      filtered.forEach(u => {
-        const aTime = u.lastActive ? u.lastActive.toMillis() : 0;
-        const isReallyOnline = u.isOnline && (now - aTime < 45000);
+      const isAlreadyFriend = (currentUserDoc.friends || []).includes(foundUser.uid);
+      const isAlreadyRequested = (foundUser.friendRequests || []).includes(currentUser.uid);
 
-        const div = document.createElement('div');
-        div.className = 'user-item';
-        div.onclick = () => openChatWith(u);
-        div.innerHTML = `
-          <div class="avatar-wrapper">
-            <img class="avatar" src="${u.photoURL}">
-            <div class="status-dot ${isReallyOnline ? 'online' : 'offline'}"></div>
+      resultBox.innerHTML = `
+        <div style="background:#0f172a; padding:12px; border-radius:10px; display:flex; align-items:center; gap:12px;">
+          <img class="avatar" src="${foundUser.photoURL}">
+          <div style="flex:1;">
+            <div style="font-weight:600; font-size:0.95rem;">${foundUser.name}</div>
+            <div style="font-size:0.75rem; color:#94a3b8;">@${foundUser.username}</div>
           </div>
-          <div>
-            <div style="font-weight:600; font-size:0.95rem;">${u.name}</div>
-            <div style="font-size:0.75rem; color:#94a3b8;">@${u.username} • ${isReallyOnline ? 'Online' : 'Offline'}</div>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
+          ${isAlreadyFriend ? '<span style="font-size:0.8rem; color:#22c55e;">Berteman</span>' : 
+            (isAlreadyRequested ? '<span style="font-size:0.8rem; color:#f59e0b;">Menunggu Acc</span>' : 
+            `<button class="btn-primary" style="width:auto; padding:6px 12px; font-size:0.8rem;" onclick="sendFriendRequest('${foundUser.uid}')">Tambah</button>`)}
+        </div>
+      `;
+    };
 
-    async function renderBlockedUsersList() {
-      const container = document.getElementById('blocked-users-list');
-      const myBlocked = currentUserDoc.blocked || [];
-      container.innerHTML = '';
-
-      if (myBlocked.length === 0) {
-        container.innerHTML = `<span style="font-size: 0.8rem; color: #94a3b8;">Tidak ada pengguna diblokir.</span>`;
-        return;
-      }
-
-      for (const uid of myBlocked) {
-        const uTarget = allUsersCache.find(u => u.uid === uid);
-        if (uTarget) {
-          const row = document.createElement('div');
-          row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 6px 10px; border-radius: 6px;";
-          row.innerHTML = `
-            <span style="font-size: 0.85rem;">${uTarget.name}</span>
-            <button class="btn-primary" style="width: auto; padding: 4px 10px; font-size: 0.75rem; background: #22c55e;" onclick="unblockUser('${uid}')">Buka Blokir</button>
-          `;
-          container.appendChild(row);
+    window.sendFriendRequest = async function(targetUid) {
+      const targetRef = doc(db, "users", targetUid);
+      const targetSnap = await getDoc(targetRef);
+      if (targetSnap.exists()) {
+        const targetData = targetSnap.data();
+        const requests = targetData.friendRequests || [];
+        if (!requests.includes(currentUser.uid)) {
+          requests.push(currentUser.uid);
+          await updateDoc(targetRef, { friendRequests: requests });
+          alert("Permintaan pertemanan terkirim!");
+          closeAddFriendModal();
         }
-      }
-    }
-
-    window.unblockUser = async function(targetUid) {
-      const myBlocked = currentUserDoc.blocked || [];
-      const index = myBlocked.indexOf(targetUid);
-      if (index > -1) {
-        myBlocked.splice(index, 1);
-        await updateDoc(doc(db, "users", currentUser.uid), { blocked: myBlocked });
-        currentUserDoc.blocked = myBlocked;
-        alert("Pengguna berhasil dibuka blokirnya.");
-        loadUsersList();
       }
     };
 
-    // --- OPEN CHAT & BLOCK CHECK ---
+    function renderFriendRequests() {
+      const container = document.getElementById('friend-requests-container');
+      const reqs = currentUserDoc.friendRequests || [];
+      container.innerHTML = '';
+
+      if (reqs.length === 0) {
+        container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Tidak ada permintaan pertemanan.</div>`;
+        return;
+      }
+
+      reqs.forEach(uid => {
+        const u = allUsersCache.find(user => user.uid === uid);
+        if (u) {
+          const div = document.createElement('div');
+          div.className = 'user-item';
+          div.innerHTML = `
+            <img class="avatar" src="${u.photoURL}">
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size:0.95rem;">${u.name}</div>
+              <div style="font-size:0.75rem; color:#94a3b8;">@${u.username}</div>
+            </div>
+            <button class="btn-primary" style="width:auto; padding:6px 10px; font-size:0.75rem; background:#22c55e;" onclick="acceptFriend('${u.uid}')">Terima</button>
+          `;
+          container.appendChild(div);
+        }
+      });
+    }
+
+    window.acceptFriend = async function(friendUid) {
+      const myFriends = currentUserDoc.friends || [];
+      myFriends.push(friendUid);
+      const myReqs = currentUserDoc.friendRequests || [];
+      const newReqs = myReqs.filter(id => id !== friendUid);
+
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        friends: myFriends,
+        friendRequests: newReqs
+      });
+
+      // Tambahkan juga saya ke teman dia
+      const friendRef = doc(db, "users", friendUid);
+      const fSnap = await getDoc(friendRef);
+      if (fSnap.exists()) {
+        const fFriends = fSnap.data().friends || [];
+        fFriends.push(currentUser.uid);
+        await updateDoc(friendRef, { friends: fFriends });
+      }
+
+      alert("Pertemanan diterima!");
+    };
+
+    // --- RENDER CHAT LIST (FRIENDS & GROUPS) ---
+    function renderChatList() {
+      const container = document.getElementById('chat-list-container');
+      container.innerHTML = '';
+      const myFriends = currentUserDoc.friends || [];
+      const now = Date.now();
+
+      // 1. Tampilkan Teman
+      if (myFriends.length === 0) {
+        container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Belum ada teman. Klik "Tambah Teman" di atas.</div>`;
+      } else {
+        myFriends.forEach(uid => {
+          const u = allUsersCache.find(user => user.uid === uid);
+          if (u) {
+            const aTime = u.lastActive ? u.lastActive.toMillis() : 0;
+            const isReallyOnline = u.isOnline && (now - aTime < 45000);
+
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.onclick = () => openPrivateChat(u);
+            div.innerHTML = `
+              <div class="avatar-wrapper">
+                <img class="avatar" src="${u.photoURL}">
+                <div class="status-dot ${isReallyOnline ? 'online' : 'offline'}"></div>
+              </div>
+              <div>
+                <div style="font-weight:600; font-size:0.95rem;">${u.name}</div>
+                <div style="font-size:0.75rem; color:#94a3b8;">@${u.username} • ${isReallyOnline ? 'Online' : 'Offline'}</div>
+              </div>
+            `;
+            container.appendChild(div);
+          }
+        });
+      }
+
+      // 2. Tampilkan Grup
+      onSnapshot(collection(db, "groups"), (groupSnap) => {
+        // Render grup yang saya ikuti
+        groupSnap.forEach(gDoc => {
+          const gData = gDoc.data();
+          if (gData.members && gData.members.includes(currentUser.uid)) {
+            // Cek apakah elemen grup sudah ada, kalau belum buat
+            let gDiv = document.getElementById(`group-item-${gDoc.id}`);
+            if (!gDiv) {
+              gDiv = document.createElement('div');
+              gDiv.id = `group-item-${gDoc.id}`;
+              gDiv.className = 'user-item';
+              gDiv.onclick = () => openGroupChat({ id: gDoc.id, ...gData });
+              gDiv.innerHTML = `
+                <div class="avatar-wrapper">
+                  <img class="avatar" src="${gData.photoURL || 'https://via.placeholder.com/150'}">
+                </div>
+                <div>
+                  <div style="font-weight:600; font-size:0.95rem; color:#38bdf8;">${gData.name} (Grup)</div>
+                  <div style="font-size:0.75rem; color:#94a3b8;">${gData.members.length} Anggota</div>
+                </div>
+              `;
+              container.appendChild(gDiv);
+            }
+          }
+        });
+      });
+    }
+
+    // --- GROUP CREATION ---
+    window.openCreateGroupModal = function() {
+      document.getElementById('create-group-modal').style.display = 'flex';
+      document.getElementById('group-name-input').value = '';
+      document.getElementById('group-desc-input').value = '';
+      
+      const box = document.getElementById('group-friends-checkboxes');
+      box.innerHTML = '';
+      const myFriends = currentUserDoc.friends || [];
+      if (myFriends.length === 0) {
+        box.innerHTML = '<span style="font-size:0.8rem; color:#94a3b8;">Anda harus punya teman untuk membuat grup.</span>';
+        return;
+      }
+
+      myFriends.forEach(uid => {
+        const u = allUsersCache.find(user => user.uid === uid);
+        if (u) {
+          const label = document.createElement('label');
+          label.style.cssText = "display:flex; align-items:center; gap:8px; font-size:0.9rem; cursor:pointer;";
+          label.innerHTML = `<input type="checkbox" value="${u.uid}" class="group-member-checkbox"> ${u.name} (@${u.username})`;
+          box.appendChild(label);
+        }
+      });
+    };
+
+    window.closeCreateGroupModal = function() {
+      document.getElementById('create-group-modal').style.display = 'none';
+    };
+
+    window.submitCreateGroup = async function() {
+      const name = document.getElementById('group-name-input').value.trim();
+      const desc = document.getElementById('group-desc-input').value.trim();
+      if (!name) return alert("Nama grup wajib diisi!");
+
+      const checkboxes = document.querySelectorAll('.group-member-checkbox:checked');
+      const members = [currentUser.uid];
+      checkboxes.forEach(cb => members.push(cb.value));
+
+      if (members.length < 2) return alert("Pilih minimal 1 teman untuk dimasukkan ke grup!");
+
+      await addDoc(collection(db, "groups"), {
+        name: name,
+        description: desc,
+        photoURL: 'https://via.placeholder.com/150',
+        creator: currentUser.uid,
+        admins: [currentUser.uid],
+        members: members,
+        onlyAdminChat: false,
+        timestamp: serverTimestamp()
+      });
+
+      alert("Grup berhasil dibuat!");
+      closeCreateGroupModal();
+    };
+
+    // --- OPEN PRIVATE CHAT ---
     let chatUnsubscribe = null;
     let typingUnsubscribe = null;
 
-    window.openChatWith = async function(targetUser) {
-      activeChatUser = targetUser;
+    window.openPrivateChat = function(targetUser) {
+      activeChatTarget = targetUser;
+      activeChatType = 'private';
       
       document.getElementById('active-chat-name').textContent = targetUser.name;
       document.getElementById('active-chat-avatar').src = targetUser.photoURL;
@@ -962,6 +1166,7 @@
 
       document.getElementById('active-chat-status').className = `status-dot ${isReallyOnline ? 'online' : 'offline'}`;
       document.getElementById('active-chat-info').textContent = isReallyOnline ? 'Online' : 'Offline';
+      document.getElementById('group-settings-option').style.display = 'none';
       
       document.getElementById('chat-input').disabled = false;
       document.getElementById('btn-send-msg').disabled = false;
@@ -974,7 +1179,41 @@
       }
 
       const chatId = getChatId(currentUser.uid, targetUser.uid);
-      
+      listenMessages(chatId);
+    };
+
+    // --- OPEN GROUP CHAT ---
+    window.openGroupChat = function(groupData) {
+      activeChatTarget = groupData;
+      activeChatType = 'group';
+
+      document.getElementById('active-chat-name').textContent = groupData.name;
+      document.getElementById('active-chat-avatar').src = groupData.photoURL || 'https://via.placeholder.com/150';
+      document.getElementById('active-chat-status').className = 'status-dot online';
+      document.getElementById('active-chat-info').textContent = `${groupData.members.length} Anggota`;
+      document.getElementById('group-settings-option').style.display = 'block';
+
+      // Cek apakah onlyAdminChat aktif dan saya bukan admin
+      const isAdmin = groupData.admins.includes(currentUser.uid);
+      if (groupData.onlyAdminChat && !isAdmin) {
+        document.getElementById('chat-input').disabled = true;
+        document.getElementById('btn-send-msg').disabled = true;
+        document.getElementById('chat-input').placeholder = "Hanya admin yang dapat mengirim pesan di grup ini.";
+      } else {
+        document.getElementById('chat-input').disabled = false;
+        document.getElementById('btn-send-msg').disabled = false;
+        document.getElementById('chat-input').placeholder = "Tulis pesan grup...";
+      }
+
+      if (window.innerWidth <= 768) {
+        document.getElementById('chat-area').classList.add('active-mobile');
+        document.getElementById('btn-back-sidebar').style.display = 'block';
+      }
+
+      listenMessages(groupData.id);
+    };
+
+    function listenMessages(chatId) {
       if (chatUnsubscribe) chatUnsubscribe();
       const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
 
@@ -986,7 +1225,7 @@
           const msg = docSnap.data();
           const isMe = msg.senderId === currentUser.uid;
 
-          if (!isMe && !msg.read) {
+          if (!isMe && !msg.read && activeChatType === 'private') {
             updateDoc(doc(db, "chats", chatId, "messages", docSnap.id), { read: true });
           }
 
@@ -1002,7 +1241,7 @@
             contentHtml = formatMarkdownAndLinks(msg.text);
           }
 
-          const readStatusIcon = isMe 
+          const readStatusIcon = isMe && activeChatType === 'private'
             ? (msg.read ? '<i class="fa-solid fa-check-double" style="color:#38bdf8;"></i>' : '<i class="fa-solid fa-check"></i>') 
             : '';
 
@@ -1018,20 +1257,7 @@
         });
         container.scrollTop = container.scrollHeight;
       });
-
-      if (typingUnsubscribe) typingUnsubscribe();
-      typingUnsubscribe = onSnapshot(doc(db, "chats", chatId), (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          const typingIndicator = document.getElementById('typing-indicator');
-          if (data.typing && data.typing !== currentUser.uid) {
-            typingIndicator.textContent = `${targetUser.name} sedang mengetik...`;
-          } else {
-            typingIndicator.textContent = '';
-          }
-        }
-      });
-    };
+    }
 
     window.closeMobileChat = function() {
       document.getElementById('chat-area').classList.remove('active-mobile');
@@ -1041,19 +1267,8 @@
       return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
     }
 
-    // --- CHAT MESSAGING & PHOTO SENDING ---
+    // --- SEND MESSAGE ---
     const chatInput = document.getElementById('chat-input');
-    chatInput.addEventListener('input', () => {
-      if (!activeChatUser) return;
-      const chatId = getChatId(currentUser.uid, activeChatUser.uid);
-      setDoc(doc(db, "chats", chatId), { typing: currentUser.uid }, { merge: true });
-
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => {
-        setDoc(doc(db, "chats", chatId), { typing: false }, { merge: true });
-      }, 2000);
-    });
-
     document.getElementById('btn-send-msg').addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
@@ -1061,10 +1276,10 @@
 
     async function sendMessage() {
       const text = chatInput.value.trim();
-      if (!text || !activeChatUser) return;
+      if (!text || !activeChatTarget) return;
 
       chatInput.value = '';
-      const chatId = getChatId(currentUser.uid, activeChatUser.uid);
+      const chatId = activeChatType === 'private' ? getChatId(currentUser.uid, activeChatTarget.uid) : activeChatTarget.id;
       
       await addDoc(collection(db, "chats", chatId, "messages"), {
         senderId: currentUser.uid,
@@ -1073,17 +1288,15 @@
         read: false,
         timestamp: serverTimestamp()
       });
-
-      setDoc(doc(db, "chats", chatId), { typing: false }, { merge: true });
     }
 
     const chatImageInput = document.getElementById('chat-image-input');
     chatImageInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
-      if (!file || !activeChatUser) return;
+      if (!file || !activeChatTarget) return;
 
       const compressedBase64 = await compressImage(file, 800, 0.6);
-      const chatId = getChatId(currentUser.uid, activeChatUser.uid);
+      const chatId = activeChatType === 'private' ? getChatId(currentUser.uid, activeChatTarget.uid) : activeChatTarget.id;
 
       await addDoc(collection(db, "chats", chatId, "messages"), {
         senderId: currentUser.uid,
@@ -1126,6 +1339,85 @@
       }
     };
 
+    // --- GROUP SETTINGS MODAL ---
+    window.openGroupSettingsModal = async function() {
+      if (activeChatType !== 'group') return;
+      const modal = document.getElementById('group-settings-modal');
+      const content = document.getElementById('group-settings-content');
+      modal.style.display = 'flex';
+
+      const gRef = doc(db, "groups", activeChatTarget.id);
+      const gSnap = await getDoc(gRef);
+      if (!gSnap.exists()) return;
+      const gData = gSnap.data();
+
+      const isMyAdmin = gData.admins.includes(currentUser.uid);
+
+      let html = `
+        <div><b>Nama Grup:</b> ${gData.name}</div>
+        <div><b>Deskripsi:</b> ${gData.description || '-'}</div>
+        <hr style="border-color:#334155;">
+        <div><b>Izin Chat:</b> ${gData.onlyAdminChat ? 'Hanya Admin' : 'Semua Anggota'}</div>
+      `;
+
+      if (isMyAdmin) {
+        html += `
+          <button class="btn-primary" style="background:${gData.onlyAdminChat ? '#10b981' : '#ef4444'}; font-size:0.85rem;" onclick="toggleOnlyAdminChat('${activeChatTarget.id}', ${!gData.onlyAdminChat})">
+            ${gData.onlyAdminChat ? 'Izinkan Semua Chat' : 'Batasi Chat Hanya Admin'}
+          </button>
+          <hr style="border-color:#334155;">
+          <p style="font-size:0.85rem; color:#38bdf8;">Kelola Admin Anggota:</p>
+        `;
+        gData.members.forEach(mUid => {
+          const mUser = allUsersCache.find(u => u.uid === mUid);
+          if (mUser) {
+            const isAdmin = gData.admins.includes(mUid);
+            html += `
+              <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:6px 10px; border-radius:6px;">
+                <span style="font-size:0.85rem;">${mUser.name} ${isAdmin ? '(Admin)' : ''}</span>
+                ${isAdmin && mUid !== gData.creator ? `<button class="btn-primary" style="width:auto; padding:4px 8px; font-size:0.75rem; background:#ef4444;" onclick="removeAdmin('${activeChatTarget.id}', '${mUid}')">Hapus Admin</button>` : 
+                  (!isAdmin ? `<button class="btn-primary" style="width:auto; padding:4px 8px; font-size:0.75rem; background:#22c55e;" onclick="addAdmin('${activeChatTarget.id}', '${mUid}')">Jadikan Admin</button>` : '')}
+              </div>
+            `;
+          }
+        });
+      }
+
+      content.innerHTML = html;
+    };
+
+    window.closeGroupSettingsModal = function() {
+      document.getElementById('group-settings-modal').style.display = 'none';
+    };
+
+    window.toggleOnlyAdminChat = async function(gId, status) {
+      await updateDoc(doc(db, "groups", gId), { onlyAdminChat: status });
+      alert("Pengaturan izin chat diperbarui!");
+      closeGroupSettingsModal();
+    };
+
+    window.addAdmin = async function(gId, uUid) {
+      const gRef = doc(db, "groups", gId);
+      const snap = await getDoc(gRef);
+      if (snap.exists()) {
+        const admins = snap.data().admins || [];
+        admins.push(uUid);
+        await updateDoc(gRef, { admins: admins });
+        openGroupSettingsModal();
+      }
+    };
+
+    window.removeAdmin = async function(gId, uUid) {
+      const gRef = doc(db, "groups", gId);
+      const snap = await getDoc(gRef);
+      if (snap.exists()) {
+        let admins = snap.data().admins || [];
+        admins = admins.filter(id => id !== uUid);
+        await updateDoc(gRef, { admins: admins });
+        openGroupSettingsModal();
+      }
+    };
+
     // --- CHAT MENU OPTIONS ---
     window.toggleChatMenu = function() {
       const menu = document.getElementById('chat-dropdown-menu');
@@ -1134,38 +1426,33 @@
 
     window.clearChatHistory = async function() {
       toggleChatMenu();
-      if (!activeChatUser || !confirm("Hapus riwayat chat ini di perangkat Anda?")) return;
-      const chatId = getChatId(currentUser.uid, activeChatUser.uid);
+      if (!activeChatTarget || !confirm("Hapus riwayat chat ini di perangkat Anda?")) return;
+      const chatId = activeChatType === 'private' ? getChatId(currentUser.uid, activeChatTarget.uid) : activeChatTarget.id;
       const snap = await getDocs(collection(db, "chats", chatId, "messages"));
-      for (const d of snap.docs) {
-        await deleteDoc(d.ref);
-      }
+      for (const d of snap.docs) { await deleteDoc(d.ref); }
       alert("Riwayat chat dibersihkan.");
     };
 
     window.clearChatEveryone = async function() {
       toggleChatMenu();
-      if (!activeChatUser || !confirm("Hapus semua chat untuk semua orang?")) return;
-      const chatId = getChatId(currentUser.uid, activeChatUser.uid);
+      if (!activeChatTarget || !confirm("Hapus semua chat untuk semua orang?")) return;
+      const chatId = activeChatType === 'private' ? getChatId(currentUser.uid, activeChatTarget.uid) : activeChatTarget.id;
       const snap = await getDocs(collection(db, "chats", chatId, "messages"));
-      for (const d of snap.docs) {
-        await deleteDoc(d.ref);
-      }
+      for (const d of snap.docs) { await deleteDoc(d.ref); }
       alert("Semua chat berhasil dihapus.");
     };
 
     window.toggleBlockUser = async function() {
       toggleChatMenu();
-      if (!activeChatUser) return;
+      if (activeChatType !== 'private' || !activeChatTarget) return;
       const myBlocked = currentUserDoc.blocked || [];
-      const isBlocked = myBlocked.includes(activeChatUser.uid);
+      const isBlocked = myBlocked.includes(activeChatTarget.uid);
 
       if (isBlocked) {
-        const index = myBlocked.indexOf(activeChatUser.uid);
-        myBlocked.splice(index, 1);
+        myBlocked.splice(myBlocked.indexOf(activeChatTarget.uid), 1);
       } else {
-        if (!confirm(`Blokir ${activeChatUser.name}?`)) return;
-        myBlocked.push(activeChatUser.uid);
+        if (!confirm(`Blokir ${activeChatTarget.name}?`)) return;
+        myBlocked.push(activeChatTarget.uid);
       }
 
       await updateDoc(doc(db, "users", currentUser.uid), { blocked: myBlocked });
@@ -1175,9 +1462,9 @@
     };
 
     function updateBlockMenuUI() {
-      if (!activeChatUser) return;
+      if (!activeChatTarget || activeChatType !== 'private') return;
       const myBlocked = currentUserDoc.blocked || [];
-      const isBlocked = myBlocked.includes(activeChatUser.uid);
+      const isBlocked = myBlocked.includes(activeChatTarget.uid);
       const btn = document.getElementById('block-menu-btn');
       btn.textContent = isBlocked ? "Buka Blokir" : "Blokir Pengguna";
     }
@@ -1185,7 +1472,7 @@
     // --- VOICE NOTE ---
     const btnRecord = document.getElementById('btn-record-vn');
     btnRecord.addEventListener('click', async () => {
-      if (!activeChatUser) return alert("Pilih lawan bicara terlebih dahulu!");
+      if (!activeChatTarget) return alert("Pilih obrolan terlebih dahulu!");
 
       if (!isRecording) {
         try {
@@ -1200,7 +1487,7 @@
             reader.readAsDataURL(audioBlob);
             reader.onloadend = async () => {
               const base64Audio = reader.result;
-              const chatId = getChatId(currentUser.uid, activeChatUser.uid);
+              const chatId = activeChatType === 'private' ? getChatId(currentUser.uid, activeChatTarget.uid) : activeChatTarget.id;
               await addDoc(collection(db, "chats", chatId, "messages"), {
                 senderId: currentUser.uid,
                 mediaUrl: base64Audio,
@@ -1215,7 +1502,7 @@
           isRecording = true;
           btnRecord.style.color = '#ef4444';
         } catch (err) {
-          alert("Izin mikrofon ditolak atau tidak didukung!");
+          alert("Izin mikrofon ditolak!");
         }
       } else {
         mediaRecorder.stop();
@@ -1224,7 +1511,6 @@
       }
     });
 
-    // --- FORMATTING TEXT & LINKS ---
     function formatMarkdownAndLinks(text) {
       let formatted = text
         .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -1238,7 +1524,7 @@
       return formatted;
     }
 
-    // --- STATUS SYSTEM ---
+    // --- STATUS SYSTEM (LOCAL DEVICE OBJECT / BASE64 STREAMING) ---
     window.openAddStatusModal = function() {
       document.getElementById('status-add-modal').style.display = 'flex';
     };
@@ -1246,7 +1532,7 @@
       document.getElementById('status-add-modal').style.display = 'none';
       document.getElementById('input-status-file').value = '';
       document.getElementById('input-status-caption').value = '';
-      document.getElementById('status-file-label').textContent = "Pilih Video dari Galeri";
+      document.getElementById('status-file-label').textContent = "Pilih Video Galeri";
       document.getElementById('btn-submit-status').disabled = true;
       selectedStatusFile = null;
     };
@@ -1264,52 +1550,41 @@
       if (!selectedStatusFile) return;
       const caption = document.getElementById('input-status-caption').value.trim();
       const btn = document.getElementById('btn-submit-status');
-      btn.textContent = "Mengunggah...";
+      btn.textContent = "Menyimpan...";
       btn.disabled = true;
 
       try {
-        const formData = new FormData();
-        formData.append('file', selectedStatusFile);
+        const reader = new FileReader();
+        reader.readAsDataURL(selectedStatusFile);
+        reader.onloadend = async () => {
+          const base64Video = reader.result; // Disimpan lokal dalam struktur Firestore
 
-        const response = await fetch('https://tmpfiles.org/api/v1/upload', {
-          method: 'POST',
-          body: formData
-        });
+          const userStatusRef = doc(db, "statuses", currentUser.uid);
+          const snap = await getDoc(userStatusRef);
+          
+          let videos = [];
+          if (snap.exists()) {
+            videos = snap.data().videos || [];
+          }
 
-        if (!response.ok) throw new Error("Gagal terhubung ke server pengunggah.");
-        const resData = await response.json();
-        
-        if (resData.status !== "success" || !resData.data || !resData.data.url) {
-          throw new Error("Gagal mengunggah status video.");
-        }
+          videos.push({
+            url: base64Video,
+            caption: caption,
+            timestamp: Date.now(),
+            viewers: [],
+            likes: []
+          });
 
-        const directVideoUrl = resData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+          await setDoc(userStatusRef, {
+            uid: currentUser.uid,
+            userName: currentUserDoc.name,
+            userPhoto: currentUserDoc.photoURL,
+            videos: videos
+          });
 
-        const userStatusRef = doc(db, "statuses", currentUser.uid);
-        const snap = await getDoc(userStatusRef);
-        
-        let videos = [];
-        if (snap.exists()) {
-          videos = snap.data().videos || [];
-        }
-
-        videos.push({
-          url: directVideoUrl,
-          caption: caption,
-          timestamp: Date.now(),
-          viewers: [],
-          likes: []
-        });
-
-        await setDoc(userStatusRef, {
-          uid: currentUser.uid,
-          userName: currentUserDoc.name,
-          userPhoto: currentUserDoc.photoURL,
-          videos: videos
-        });
-
-        alert("Status berhasil dibagikan!");
-        closeAddStatusModal();
+          alert("Status berhasil dibagikan!");
+          closeAddStatusModal();
+        };
       } catch (err) {
         alert("Gagal mengunggah status: " + err.message);
       } finally {
@@ -1391,6 +1666,9 @@
             videos: currentViewerVideos
           });
         }
+        document.getElementById('status-reply-container').style.display = 'flex';
+      } else {
+        document.getElementById('status-reply-container').style.display = 'none';
       }
 
       document.getElementById('status-counter-text').textContent = `Status ${currentViewerIndex + 1}/${currentViewerVideos.length}`;
@@ -1423,6 +1701,27 @@
         document.getElementById('btn-delete-status').style.display = 'none';
       }
     }
+
+    // --- BALAS STATUS ORANG (Kirim pesan ke chat pribadi) ---
+    window.sendReplyStatus = async function() {
+      const replyText = document.getElementById('status-reply-input').value.trim();
+      if (!replyText || !currentViewerStatusData) return;
+
+      const targetUid = currentViewerStatusData.uid;
+      const chatId = getChatId(currentUser.uid, targetUid);
+
+      await addDoc(collection(db, "chats", chatId, "messages"), {
+        senderId: currentUser.uid,
+        text: `Membalas status: "${replyText}"`,
+        type: 'text',
+        read: false,
+        timestamp: serverTimestamp()
+      });
+
+      document.getElementById('status-reply-input').value = '';
+      alert("Pesan balasan terkirim ke chat!");
+      closeStatusViewer();
+    };
 
     window.onStatusVideoEnded = function() {
       nextStatusVideo();
@@ -1483,7 +1782,6 @@
       alert("Status video berhasil dihapus!");
     };
 
-    // --- VIEWERS LIST MODAL ---
     window.openViewersListModal = async function() {
       const v = currentViewerVideos[currentViewerIndex];
       const viewersUids = v.viewers || [];
@@ -1520,9 +1818,48 @@
       document.getElementById('viewers-list-modal').style.display = 'none';
     };
 
+    // --- BLOCKED USERS SETTINGS ---
+    async function renderBlockedUsersList() {
+      const container = document.getElementById('blocked-users-list');
+      if (!currentUserDoc) return;
+      const myBlocked = currentUserDoc.blocked || [];
+      container.innerHTML = '';
+
+      if (myBlocked.length === 0) {
+        container.innerHTML = `<span style="font-size: 0.8rem; color: #94a3b8;">Tidak ada pengguna diblokir.</span>`;
+        return;
+      }
+
+      for (const uid of myBlocked) {
+        const uTarget = allUsersCache.find(u => u.uid === uid);
+        if (uTarget) {
+          const row = document.createElement('div');
+          row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 6px 10px; border-radius: 6px;";
+          row.innerHTML = `
+            <span style="font-size: 0.85rem;">${uTarget.name}</span>
+            <button class="btn-primary" style="width: auto; padding: 4px 10px; font-size: 0.75rem; background: #22c55e;" onclick="unblockUser('${uid}')">Buka Blokir</button>
+          `;
+          container.appendChild(row);
+        }
+      }
+    }
+
+    window.unblockUser = async function(targetUid) {
+      const myBlocked = currentUserDoc.blocked || [];
+      const index = myBlocked.indexOf(targetUid);
+      if (index > -1) {
+        myBlocked.splice(index, 1);
+        await updateDoc(doc(db, "users", currentUser.uid), { blocked: myBlocked });
+        currentUserDoc.blocked = myBlocked;
+        alert("Pengguna berhasil dibuka blokirnya.");
+        renderBlockedUsersList();
+      }
+    };
+
     // --- SETTINGS & PROFILE CROPPER ---
     window.toggleSettings = function() {
       document.getElementById('settings-drawer').classList.toggle('open');
+      renderBlockedUsersList();
     };
     document.getElementById('btn-open-settings').addEventListener('click', toggleSettings);
 
@@ -1574,17 +1911,13 @@
 
     // Tab Switcher
     window.switchTab = function(tab) {
-      if (tab === 'chats') {
-        document.getElementById('tab-chats').style.display = 'flex';
-        document.getElementById('tab-status').style.display = 'none';
-        document.getElementById('tab-chats-btn').classList.add('active');
-        document.getElementById('tab-status-btn').classList.remove('active');
-      } else {
-        document.getElementById('tab-chats').style.display = 'none';
-        document.getElementById('tab-status').style.display = 'block';
-        document.getElementById('tab-chats-btn').classList.remove('active');
-        document.getElementById('tab-status-btn').classList.add('active');
-      }
+      document.getElementById('tab-chats').style.display = tab === 'chats' ? 'flex' : 'none';
+      document.getElementById('tab-requests').style.display = tab === 'requests' ? 'block' : 'none';
+      document.getElementById('tab-status').style.display = tab === 'status' ? 'block' : 'none';
+
+      document.getElementById('tab-chats-btn').classList.toggle('active', tab === 'chats');
+      document.getElementById('tab-requests-btn').classList.toggle('active', tab === 'requests');
+      document.getElementById('tab-status-btn').classList.toggle('active', tab === 'status');
     };
   </script>
 </body>
