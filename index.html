@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
   <style>
-    /* Reset & Clean Tap Highlight (Tanpa bayangan biru saat dipencet) */
+    /* Reset & Clean Tap Highlight */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -80,8 +80,8 @@
       transform: scale(0.96);
     }
 
-    /* Setup Username Modal */
-    #setup-modal, #status-add-modal {
+    /* Modals */
+    #setup-modal, #status-add-modal, #viewers-list-modal {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.95);
@@ -295,14 +295,12 @@
       display: block;
     }
 
-    /* Formatting styles inside messages */
     .msg b { font-weight: 700; }
     .msg i { font-style: italic; }
     .msg s { text-decoration: line-through; }
     .msg small { font-size: 0.8em; }
     .msg a { color: #38bdf8; text-decoration: underline; }
 
-    /* Typing indicator */
     .typing-indicator {
       font-size: 0.85rem;
       color: #38bdf8;
@@ -311,7 +309,6 @@
       height: 24px;
     }
 
-    /* Chat Input Bar */
     .chat-input-bar {
       padding: 12px;
       background: #1e293b;
@@ -357,7 +354,7 @@
       left: 0;
     }
 
-    /* Status Viewer Overlay */
+    /* Status Viewer Overlay (WhatsApp Style) */
     #status-viewer-modal {
       position: fixed;
       inset: 0;
@@ -367,21 +364,80 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 16px;
     }
-    .status-video-box {
-      max-width: 400px;
+    .status-viewer-box {
+      max-width: 420px;
       width: 100%;
-      text-align: center;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
-    .status-video-box video {
-      width: 100%;
-      max-height: 65vh;
+    .status-viewer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 10px 16px;
       border-radius: 12px;
+    }
+    .status-video-wrapper {
+      position: relative;
+      width: 100%;
       background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      max-height: 60vh;
+    }
+    .status-video-wrapper video {
+      width: 100%;
+      max-height: 60vh;
+      object-fit: contain;
+      pointer-events: none; /* Mencegah interaksi klik langsung ke video */
+    }
+    .status-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      font-size: 1.5rem;
+      padding: 16px 12px;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s;
+    }
+    .status-nav-btn:hover { background: rgba(0, 0, 0, 0.8); }
+    .status-nav-btn.prev { left: 0; border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    .status-nav-btn.next { right: 0; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+
+    .status-viewer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 12px 16px;
+      border-radius: 12px;
+    }
+    .status-action-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-action-btn.delete {
+      background: #ef4444;
+      border-color: #dc2626;
     }
   </style>
 </head>
@@ -407,11 +463,11 @@
     </div>
   </div>
 
-  <!-- ADD STATUS MODAL (LINK DIRECT) -->
+  <!-- ADD STATUS MODAL -->
   <div id="status-add-modal">
     <div class="modal-box">
       <h3>Tambah Status Video</h3>
-      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Masukkan Link Direct Video (berakhiran .mp4, dari Catbox.moe / hosting lain)</p>
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Masukkan Link Direct Video (berakhiran .mp4)</p>
       <input type="text" id="input-status-url" class="input-field" placeholder="https://files.catbox.moe/xxxxxx.mp4">
       <div style="display:flex; gap:10px;">
         <button class="btn-primary" style="background:#64748b;" onclick="closeAddStatusModal()">Batal</button>
@@ -420,11 +476,51 @@
     </div>
   </div>
 
+  <!-- VIEWERS LIST MODAL -->
+  <div id="viewers-list-modal">
+    <div class="modal-box" style="max-height:80vh; display:flex; flexDirection:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>Dilihat Oleh</h3>
+        <button class="icon-btn" onclick="closeViewersListModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="viewers-container" style="overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+
   <!-- STATUS VIEWER MODAL -->
   <div id="status-viewer-modal">
-    <button class="icon-btn" style="position:absolute; top:20px; right:20px; font-size:1.5rem;" onclick="closeStatusViewer()"><i class="fa-solid fa-xmark"></i></button>
-    <div class="status-video-box" id="status-viewer-content">
-      <!-- Diisi dinamis via JS -->
+    <div class="status-viewer-box">
+      <div class="status-viewer-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img id="viewer-owner-avatar" class="avatar" style="width:36px; height:36px;">
+          <div>
+            <div id="viewer-owner-name" style="font-weight:600; font-size:0.9rem;">-</div>
+            <div id="status-counter-text" style="font-size:0.75rem; color:#38bdf8;">Status 1/1</div>
+          </div>
+        </div>
+        <button class="icon-btn" onclick="closeStatusViewer()" style="font-size:1.3rem;"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="status-video-wrapper">
+        <button class="status-nav-btn prev" onclick="prevStatusVideo()">&lt;</button>
+        <video id="active-status-video" autoplay playsinline onended="onStatusVideoEnded()"></video>
+        <button class="status-nav-btn next" onclick="nextStatusVideo()">&gt;</button>
+      </div>
+
+      <div class="status-viewer-footer">
+        <button class="status-action-btn" id="btn-like-status" onclick="toggleLikeStatus()">
+          <i id="like-icon" class="fa-regular fa-heart" style="color:#ef4444;"></i> <span id="like-count">0</span>
+        </button>
+
+        <div id="owner-action-group" style="display:flex; gap:8px; align-items:center;">
+          <button class="status-action-btn" onclick="openViewersListModal()">
+            <i class="fa-solid fa-eye" style="color:#38bdf8;"></i> <span id="viewers-count">0</span>
+          </button>
+          <button class="status-action-btn delete" id="btn-delete-status" onclick="deleteCurrentStatusVideo()" title="Hapus Status">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -453,20 +549,16 @@
       </div>
 
       <!-- TAB CHATS -->
-      <div id="tab-chats" class="user-list">
-        <!-- List pengguna muncul di sini -->
-      </div>
+      <div id="tab-chats" class="user-list"></div>
 
       <!-- TAB STATUS -->
       <div id="tab-status" class="status-list" style="display: none;">
         <div style="padding: 16px;">
           <button class="btn-primary" onclick="openAddStatusModal()">
-            <i class="fa-solid fa-plus"></i> Tambah Status Video (Link Direct)
+            <i class="fa-solid fa-plus"></i> Tambah Status Video
           </button>
         </div>
-        <div id="status-users-list">
-          <!-- Daftar pengguna yang punya status muncul di sini -->
-        </div>
+        <div id="status-users-list"></div>
       </div>
     </div>
 
@@ -484,9 +576,7 @@
         </div>
       </div>
 
-      <div class="chat-messages" id="chat-messages">
-        <!-- Chat items -->
-      </div>
+      <div class="chat-messages" id="chat-messages"></div>
 
       <div class="typing-indicator" id="typing-indicator"></div>
 
@@ -550,7 +640,6 @@
       orderBy, onSnapshot, deleteDoc, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Configuration Firebase Anda
     const firebaseConfig = {
       apiKey: "AIzaSyCNEdsbqbm44Ic6y2MFv66DQsqp-QEe4Fc",
       authDomain: "tanpa-nama-4b895.firebaseapp.com",
@@ -561,13 +650,11 @@
       measurementId: "G-9GY8CMB8X8"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // Global App States
     let currentUser = null;
     let currentUserDoc = null;
     let activeChatUser = null;
@@ -874,7 +961,7 @@
       return formatted;
     }
 
-    // --- STATUS SYSTEM (DIRECT LINK & MULTI-VIDEO PER USER) ---
+    // --- STATUS SYSTEM ---
     window.openAddStatusModal = function() {
       document.getElementById('status-add-modal').style.display = 'flex';
     };
@@ -896,10 +983,11 @@
           videos = snap.data().videos || [];
         }
 
-        // Tambah video baru ke array milik user ini
         videos.push({
           url: url,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          viewers: [],
+          likes: []
         });
 
         await setDoc(userStatusRef, {
@@ -946,62 +1034,116 @@
       });
     }
 
+    let currentViewerStatusData = null;
     let currentViewerVideos = [];
     let currentViewerIndex = 0;
-    let viewingOwnerUid = null;
 
-    window.openStatusViewer = function(statusData) {
+    window.openStatusViewer = async function(statusData) {
+      currentViewerStatusData = statusData;
       currentViewerVideos = statusData.videos;
       currentViewerIndex = 0;
-      viewingOwnerUid = statusData.uid;
+
+      document.getElementById('viewer-owner-avatar').src = statusData.userPhoto;
+      document.getElementById('viewer-owner-name').textContent = statusData.userName;
 
       document.getElementById('status-viewer-modal').style.display = 'flex';
-      renderCurrentStatusVideo();
+      await recordViewerAndRender();
     };
 
     window.closeStatusViewer = function() {
       document.getElementById('status-viewer-modal').style.display = 'none';
-      document.getElementById('status-viewer-content').innerHTML = '';
+      const videoEl = document.getElementById('active-status-video');
+      videoEl.pause();
+      videoEl.src = '';
     };
 
-    window.renderCurrentStatusVideo = function() {
-      const contentBox = document.getElementById('status-viewer-content');
+    async function recordViewerAndRender() {
       const v = currentViewerVideos[currentViewerIndex];
-      const isMyStatus = viewingOwnerUid === currentUser.uid;
+      const isMyStatus = currentViewerStatusData.uid === currentUser.uid;
 
-      contentBox.innerHTML = `
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; justify-content:flex-start;">
-          <span style="font-size:0.85rem; color:#94a3b8;">Video ${currentViewerIndex + 1} dari ${currentViewerVideos.length}</span>
-        </div>
-        <video src="${v.url}" controls autoplay></video>
-        <div style="display:flex; justify-content:space-between; margin-top:12px; align-items:center;">
-          <button class="btn-primary" style="width:auto; padding:8px 16px; background:${currentViewerIndex > 0 ? '#0284c7' : '#334155'}" ${currentViewerIndex === 0 ? 'disabled' : ''} onclick="prevStatusVideo()">Sebelumnya</button>
-          
-          ${isMyStatus ? `<button class="btn-primary" style="width:auto; padding:8px 16px; background:#ef4444;" onclick="deleteThisStatusVideo(${currentViewerIndex})">Hapus Video Ini</button>` : ''}
-          
-          <button class="btn-primary" style="width:auto; padding:8px 16px; background:${currentViewerIndex < currentViewerVideos.length - 1 ? '#0284c7' : '#334155'}" ${currentViewerIndex === currentViewerVideos.length - 1 ? 'disabled' : ''} onclick="nextStatusVideo()">Selanjutnya</button>
-        </div>
-      `;
+      // Track viewer jika bukan status sendiri
+      if (!isMyStatus) {
+        if (!v.viewers) v.viewers = [];
+        if (!v.viewers.includes(currentUser.uid)) {
+          v.viewers.push(currentUser.uid);
+          await updateDoc(doc(db, "statuses", currentViewerStatusData.uid), {
+            videos: currentViewerVideos
+          });
+        }
+      }
+
+      // Render Counter Status X/Y
+      document.getElementById('status-counter-text').textContent = `Status ${currentViewerIndex + 1}/${currentViewerVideos.length}`;
+
+      // Render Video (tanpa kontrol bawaan, auto play)
+      const videoEl = document.getElementById('active-status-video');
+      videoEl.src = v.url;
+      videoEl.play().catch(e => console.log("Autoplay blocked:", e));
+
+      // Render Likes & Viewers info
+      const likeCount = v.likes ? v.likes.length : 0;
+      const isLiked = v.likes && v.likes.includes(currentUser.uid);
+      document.getElementById('like-count').textContent = likeCount;
+      const likeIcon = document.getElementById('like-icon');
+      likeIcon.className = isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart";
+
+      document.getElementById('viewers-count').textContent = v.viewers ? v.viewers.length : 0;
+
+      // Sembunyikan tombol hapus & penonton jika bukan status sendiri
+      if (isMyStatus) {
+        document.getElementById('owner-action-group').style.display = 'flex';
+      } else {
+        document.getElementById('owner-action-group').style.display = 'flex';
+        // Sembunyikan tombol hapus untuk orang lain
+        document.getElementById('btn-delete-status').style.display = 'none';
+      }
+    }
+
+    window.onStatusVideoEnded = function() {
+      nextStatusVideo();
     };
 
-    window.nextStatusVideo = function() {
+    window.nextStatusVideo = async function() {
       if (currentViewerIndex < currentViewerVideos.length - 1) {
         currentViewerIndex++;
-        renderCurrentStatusVideo();
+        await recordViewerAndRender();
+      } else {
+        closeStatusViewer();
       }
     };
 
-    window.prevStatusVideo = function() {
+    window.prevStatusVideo = async function() {
       if (currentViewerIndex > 0) {
         currentViewerIndex--;
-        renderCurrentStatusVideo();
+        await recordViewerAndRender();
       }
     };
 
-    window.deleteThisStatusVideo = async function(index) {
+    window.toggleLikeStatus = async function() {
+      const v = currentViewerVideos[currentViewerIndex];
+      if (!v.likes) v.likes = [];
+
+      const idx = v.likes.indexOf(currentUser.uid);
+      if (idx > -1) {
+        v.likes.splice(idx, 1);
+      } else {
+        v.likes.push(currentUser.uid);
+      }
+
+      await updateDoc(doc(db, "statuses", currentViewerStatusData.uid), {
+        videos: currentViewerVideos
+      });
+
+      // Refresh UI likes
+      const isLiked = v.likes.includes(currentUser.uid);
+      document.getElementById('like-count').textContent = v.likes.length;
+      document.getElementById('like-icon').className = isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart";
+    };
+
+    window.deleteCurrentStatusVideo = async function() {
       if (!confirm("Hapus video status ini secara permanen?")) return;
 
-      currentViewerVideos.splice(index, 1);
+      currentViewerVideos.splice(currentViewerIndex, 1);
       const userStatusRef = doc(db, "statuses", currentUser.uid);
 
       if (currentViewerVideos.length === 0) {
@@ -1012,9 +1154,46 @@
         if (currentViewerIndex >= currentViewerVideos.length) {
           currentViewerIndex = currentViewerVideos.length - 1;
         }
-        renderCurrentStatusVideo();
+        await recordViewerAndRender();
       }
       alert("Status video berhasil dihapus!");
+    };
+
+    // --- VIEWERS LIST MODAL ---
+    window.openViewersListModal = async function() {
+      const v = currentViewerVideos[currentViewerIndex];
+      const viewersUids = v.viewers || [];
+      const container = document.getElementById('viewers-container');
+      container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:10px;">Memuat...</div>';
+      document.getElementById('viewers-list-modal').style.display = 'flex';
+
+      if (viewersUids.length === 0) {
+        container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Belum ada yang melihat status ini.</div>';
+        return;
+      }
+
+      container.innerHTML = '';
+      for (const uid of viewersUids) {
+        const uSnap = await getDoc(doc(db, "users", uid));
+        if (uSnap.exists()) {
+          const uData = uSnap.data();
+          const div = document.createElement('div');
+          div.className = 'user-item';
+          div.style.borderBottom = '1px solid #334155';
+          div.innerHTML = `
+            <img class="avatar" src="${uData.photoURL}">
+            <div>
+              <div style="font-weight:600; font-size:0.9rem;">${uData.name}</div>
+              <div style="font-size:0.75rem; color:#94a3b8;">@${uData.username}</div>
+            </div>
+          `;
+          container.appendChild(div);
+        }
+      }
+    };
+
+    window.closeViewersListModal = function() {
+      document.getElementById('viewers-list-modal').style.display = 'none';
     };
 
     // --- SETTINGS & PROFILE CROPPER ---
