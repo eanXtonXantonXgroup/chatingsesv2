@@ -123,7 +123,6 @@
     }
     .btn-primary:active { opacity: 0.8; }
 
-    /* Custom Gorgeous File Upload Button */
     .custom-file-upload {
       display: flex;
       align-items: center;
@@ -139,9 +138,7 @@
       margin-top: 12px;
       margin-bottom: 16px;
       box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
-      transition: transform 0.1s;
     }
-    .custom-file-upload:active { transform: scale(0.97); }
 
     /* Main App Layout */
     #app-screen {
@@ -363,7 +360,7 @@
       position: fixed;
       top: 0;
       left: -350px;
-      width: 320px;
+      width: 340px;
       height: 100%;
       background: #1e293b;
       z-index: 90;
@@ -373,6 +370,7 @@
       flex-direction: column;
       gap: 16px;
       border-right: 1px solid #334155;
+      overflow-y: auto;
     }
     #settings-drawer.open {
       left: 0;
@@ -433,9 +431,7 @@
       padding: 16px 12px;
       cursor: pointer;
       z-index: 10;
-      transition: background 0.2s;
     }
-    .status-nav-btn:hover { background: rgba(0, 0, 0, 0.8); }
     .status-nav-btn.prev { left: 0; border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
     .status-nav-btn.next { right: 0; border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
 
@@ -497,15 +493,15 @@
     </div>
   </div>
 
-  <!-- ADD STATUS MODAL (AUTO UPLOAD) -->
+  <!-- ADD STATUS MODAL -->
   <div id="status-add-modal">
     <div class="modal-box">
       <h3>Tambah Status Video</h3>
-      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Pilih video dari galeri Anda</p>
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Pilih video MP4 dari galeri Anda</p>
       
       <label class="custom-file-upload">
         <i class="fa-solid fa-video"></i> <span id="status-file-label">Pilih Video dari Galeri</span>
-        <input type="file" id="input-status-file" accept="video/*" style="display:none;">
+        <input type="file" id="input-status-file" accept="video/mp4,video/*" style="display:none;">
       </label>
 
       <input type="text" id="input-status-caption" class="input-field" placeholder="Tulis deskripsi / caption status..." style="margin-top:4px; margin-bottom:16px;">
@@ -625,7 +621,6 @@
           </div>
         </div>
         
-        <!-- Menu Titik Tiga Chat Options -->
         <div style="position:relative;">
           <button class="icon-btn" onclick="toggleChatMenu()"><i class="fa-solid fa-ellipsis-vertical"></i></button>
           <div id="chat-dropdown-menu" style="display:none; position:absolute; right:0; top:35px; background:#1e293b; border:1px solid #334155; border-radius:8px; width:180px; z-index:60; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
@@ -641,7 +636,6 @@
       <div class="typing-indicator" id="typing-indicator"></div>
 
       <div class="chat-input-bar">
-        <!-- Input Gambar Tersembunyi -->
         <input type="file" id="chat-image-input" accept="image/*" style="display:none;">
         <button class="icon-btn" onclick="document.getElementById('chat-image-input').click()" title="Kirim Foto"><i class="fa-regular fa-image"></i></button>
         
@@ -678,8 +672,16 @@
       <input type="text" id="setting-bio" class="input-field" placeholder="Sedang sibuk...">
     </div>
 
-    <button class="btn-primary" id="btn-save-settings">Simpan Perubahan</button>
-    <button class="btn-primary" style="background:#ef4444; margin-top:auto;" id="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar (Log Out)</button>
+    <!-- DAFTAR PENGGUNA YANG DIBLOKIR -->
+    <div style="margin-top: 10px;">
+      <label style="font-size:0.8rem; color:#38bdf8; font-weight:600;">Pengguna yang Diblokir</label>
+      <div id="blocked-users-list" style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;">
+        <span style="font-size: 0.8rem; color: #94a3b8;">Tidak ada pengguna diblokir.</span>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-save-settings" style="margin-top: 10px;">Simpan Perubahan</button>
+    <button class="btn-primary" style="background:#ef4444; margin-top:10px; margin-bottom:20px;" id="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar (Log Out)</button>
   </div>
 
   <!-- CROPPING MODAL -->
@@ -773,7 +775,6 @@
       }
     });
 
-    // Heartbeat for Accurate Online Status
     function startHeartbeat() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
       heartbeatInterval = setInterval(async () => {
@@ -838,9 +839,10 @@
 
       loadUsersList();
       listenStatusUpdates();
+      renderBlockedUsersList();
     }
 
-    // --- LOAD USER LIST (ONLINE FIRST & SEARCH) ---
+    // --- LOAD USER LIST & BLOCKED MANAGEMENT ---
     function loadUsersList() {
       onSnapshot(collection(db, "users"), (snapshot) => {
         allUsersCache = [];
@@ -848,6 +850,7 @@
           allUsersCache.push(docSnap.data());
         });
         renderUserListView();
+        renderBlockedUsersList();
       });
     }
 
@@ -861,19 +864,16 @@
       const searchText = document.getElementById('search-user-input').value.toLowerCase();
       const now = Date.now();
 
-      // Filter and Sort: Online users first
       const filtered = allUsersCache.filter(u => {
         if (u.uid === currentUser.uid) return false;
         const myBlocked = currentUserDoc.blocked || [];
         const theirBlocked = u.blocked || [];
         if (myBlocked.includes(u.uid) || theirBlocked.includes(currentUser.uid)) return false;
 
-        const matchesSearch = u.name.toLowerCase().includes(searchText) || u.username.toLowerCase().includes(searchText);
-        return matchesSearch;
+        return u.name.toLowerCase().includes(searchText) || u.username.toLowerCase().includes(searchText);
       });
 
       filtered.sort((a, b) => {
-        // Calculate true online state (< 45 seconds since last active)
         const aTime = a.lastActive ? a.lastActive.toMillis() : 0;
         const bTime = b.lastActive ? b.lastActive.toMillis() : 0;
         const aOnline = a.isOnline && (now - aTime < 45000);
@@ -882,7 +882,7 @@
         if (aOnline === bOnline) {
           return a.name.localeCompare(b.name);
         }
-        return aOnline ? -1 : 1; // Online comes first
+        return aOnline ? -1 : 1;
       });
 
       if (filtered.length === 0) {
@@ -910,6 +910,42 @@
         container.appendChild(div);
       });
     }
+
+    async function renderBlockedUsersList() {
+      const container = document.getElementById('blocked-users-list');
+      const myBlocked = currentUserDoc.blocked || [];
+      container.innerHTML = '';
+
+      if (myBlocked.length === 0) {
+        container.innerHTML = `<span style="font-size: 0.8rem; color: #94a3b8;">Tidak ada pengguna diblokir.</span>`;
+        return;
+      }
+
+      for (const uid of myBlocked) {
+        const uTarget = allUsersCache.find(u => u.uid === uid);
+        if (uTarget) {
+          const row = document.createElement('div');
+          row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 6px 10px; border-radius: 6px;";
+          row.innerHTML = `
+            <span style="font-size: 0.85rem;">${uTarget.name}</span>
+            <button class="btn-primary" style="width: auto; padding: 4px 10px; font-size: 0.75rem; background: #22c55e;" onclick="unblockUser('${uid}')">Buka Blokir</button>
+          `;
+          container.appendChild(row);
+        }
+      }
+    }
+
+    window.unblockUser = async function(targetUid) {
+      const myBlocked = currentUserDoc.blocked || [];
+      const index = myBlocked.indexOf(targetUid);
+      if (index > -1) {
+        myBlocked.splice(index, 1);
+        await updateDoc(doc(db, "users", currentUser.uid), { blocked: myBlocked });
+        currentUserDoc.blocked = myBlocked;
+        alert("Pengguna berhasil dibuka blokirnya.");
+        loadUsersList();
+      }
+    };
 
     // --- OPEN CHAT & BLOCK CHECK ---
     let chatUnsubscribe = null;
@@ -1202,7 +1238,7 @@
       return formatted;
     }
 
-    // --- STATUS SYSTEM (AUTO UPLOAD VIA TMPFILES & 24H FILTER) ---
+    // --- STATUS SYSTEM ---
     window.openAddStatusModal = function() {
       document.getElementById('status-add-modal').style.display = 'flex';
     };
