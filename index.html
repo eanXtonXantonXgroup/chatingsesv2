@@ -396,7 +396,7 @@
       width: 100%;
       max-height: 60vh;
       object-fit: contain;
-      pointer-events: none; /* Mencegah interaksi klik langsung ke video */
+      pointer-events: none;
     }
     .status-nav-btn {
       position: absolute;
@@ -463,22 +463,23 @@
     </div>
   </div>
 
-  <!-- ADD STATUS MODAL -->
+  <!-- ADD STATUS MODAL (AUTO UPLOAD SAVEDLY) -->
   <div id="status-add-modal">
     <div class="modal-box">
       <h3>Tambah Status Video</h3>
-      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Masukkan Link Direct Video (berakhiran .mp4)</p>
-      <input type="text" id="input-status-url" class="input-field" placeholder="https://files.catbox.moe/xxxxxx.mp4">
+      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Pilih video dari galeri HP Anda. Video akan otomatis diunggah (24 Jam).</p>
+      <input type="file" id="input-status-file" accept="video/*" class="input-field" style="padding:8px;">
+      <div id="upload-status-info" style="font-size:0.8rem; color:#38bdf8; margin-bottom:12px; text-align:center; min-height:20px;"></div>
       <div style="display:flex; gap:10px;">
         <button class="btn-primary" style="background:#64748b;" onclick="closeAddStatusModal()">Batal</button>
-        <button class="btn-primary" id="btn-submit-status">Kirim Status</button>
+        <button class="btn-primary" id="btn-submit-status" disabled>Upload & Kirim</button>
       </div>
     </div>
   </div>
 
   <!-- VIEWERS LIST MODAL -->
   <div id="viewers-list-modal">
-    <div class="modal-box" style="max-height:80vh; display:flex; flexDirection:column;">
+    <div class="modal-box" style="max-height:80vh; display:flex; flex-direction:column;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3>Dilihat Oleh</h3>
         <button class="icon-btn" onclick="closeViewersListModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -663,6 +664,7 @@
     let audioChunks = [];
     let isRecording = false;
     let typingTimeout = null;
+    let selectedVideoFile = null;
 
     // --- AUTHENTICATION ---
     document.getElementById('btn-login-google').addEventListener('click', async () => {
@@ -961,20 +963,52 @@
       return formatted;
     }
 
-    // --- STATUS SYSTEM ---
+    // --- STATUS SYSTEM (AUTO UPLOAD TO SAVEDLY & 24H EXPIRY) ---
     window.openAddStatusModal = function() {
       document.getElementById('status-add-modal').style.display = 'flex';
     };
     window.closeAddStatusModal = function() {
       document.getElementById('status-add-modal').style.display = 'none';
-      document.getElementById('input-status-url').value = '';
+      document.getElementById('input-status-file').value = '';
+      document.getElementById('upload-status-info').textContent = '';
+      document.getElementById('btn-submit-status').disabled = true;
+      selectedVideoFile = null;
     };
 
+    document.getElementById('input-status-file').addEventListener('change', (e) => {
+      selectedVideoFile = e.target.files[0];
+      if (selectedVideoFile) {
+        document.getElementById('btn-submit-status').disabled = false;
+        document.getElementById('upload-status-info').textContent = `File dipilih: ${selectedVideoFile.name}`;
+      }
+    });
+
     document.getElementById('btn-submit-status').addEventListener('click', async () => {
-      const url = document.getElementById('input-status-url').value.trim();
-      if (!url) return alert("Masukkan link direct video!");
+      if (!selectedVideoFile) return alert("Pilih video terlebih dahulu!");
+
+      const infoEl = document.getElementById('upload-status-info');
+      const submitBtn = document.getElementById('btn-submit-status');
+      infoEl.textContent = "Sedang mengunggah ke Savedly...";
+      submitBtn.disabled = true;
 
       try {
+        const formData = new FormData();
+        formData.append("file", selectedVideoFile);
+
+        // Upload ke Savedly API
+        const response = await fetch("https://savedly.net/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+        // Ambil link direct hasil upload savedly
+        const videoUrl = result.url || result.fileUrl || result.link;
+
+        if (!videoUrl) {
+          throw new Error("Gagal mendapatkan link direct dari server.");
+        }
+
         const userStatusRef = doc(db, "statuses", currentUser.uid);
         const snap = await getDoc(userStatusRef);
         
@@ -984,7 +1018,7 @@
         }
 
         videos.push({
-          url: url,
+          url: videoUrl,
           timestamp: Date.now(),
           viewers: [],
           likes: []
@@ -997,10 +1031,12 @@
           videos: videos
         });
 
-        alert("Status video berhasil ditambahkan!");
+        alert("Status video berhasil diunggah!");
         closeAddStatusModal();
       } catch (err) {
-        alert("Gagal menambah status: " + err.message);
+        alert("Gagal mengunggah video: " + err.message);
+        infoEl.textContent = "Gagal mengunggah. Coba lagi.";
+        submitBtn.disabled = false;
       }
     });
 
@@ -1009,27 +1045,36 @@
         const container = document.getElementById('status-users-list');
         container.innerHTML = '';
 
+        const now = Date.now();
+        const ONE_DAY = 24 * 60 * 60 * 1000; // 24 Jam
         let hasStatus = false;
+
         snapshot.forEach((docSnap) => {
           const data = docSnap.data();
-          if (!data.videos || data.videos.length === 0) return;
+          if (!data.videos) return;
+
+          // Saring video yang usianya masih di bawah 24 jam
+          const activeVideos = data.videos.filter(v => (now - v.timestamp) < ONE_DAY);
+          if (activeVideos.length === 0) return;
+
           hasStatus = true;
+          const cleanData = { ...data, videos: activeVideos };
 
           const div = document.createElement('div');
           div.className = 'status-user-item';
-          div.onclick = () => openStatusViewer(data);
+          div.onclick = () => openStatusViewer(cleanData);
           div.innerHTML = `
             <img class="avatar" src="${data.userPhoto}">
             <div>
               <div style="font-weight:600; font-size:0.95rem;">${data.userName}</div>
-              <div style="font-size:0.75rem; color:#94a3b8;">${data.videos.length} video status</div>
+              <div style="font-size:0.75rem; color:#94a3b8;">${activeVideos.length} video status</div>
             </div>
           `;
           container.appendChild(div);
         });
 
         if (!hasStatus) {
-          container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Belum ada status dari pengguna lain.</div>`;
+          container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Belum ada status aktif (24 jam).</div>`;
         }
       });
     }
@@ -1061,7 +1106,6 @@
       const v = currentViewerVideos[currentViewerIndex];
       const isMyStatus = currentViewerStatusData.uid === currentUser.uid;
 
-      // Track viewer jika bukan status sendiri
       if (!isMyStatus) {
         if (!v.viewers) v.viewers = [];
         if (!v.viewers.includes(currentUser.uid)) {
@@ -1072,15 +1116,12 @@
         }
       }
 
-      // Render Counter Status X/Y
       document.getElementById('status-counter-text').textContent = `Status ${currentViewerIndex + 1}/${currentViewerVideos.length}`;
 
-      // Render Video (tanpa kontrol bawaan, auto play)
       const videoEl = document.getElementById('active-status-video');
       videoEl.src = v.url;
       videoEl.play().catch(e => console.log("Autoplay blocked:", e));
 
-      // Render Likes & Viewers info
       const likeCount = v.likes ? v.likes.length : 0;
       const isLiked = v.likes && v.likes.includes(currentUser.uid);
       document.getElementById('like-count').textContent = likeCount;
@@ -1089,12 +1130,11 @@
 
       document.getElementById('viewers-count').textContent = v.viewers ? v.viewers.length : 0;
 
-      // Sembunyikan tombol hapus & penonton jika bukan status sendiri
       if (isMyStatus) {
         document.getElementById('owner-action-group').style.display = 'flex';
+        document.getElementById('btn-delete-status').style.display = 'block';
       } else {
         document.getElementById('owner-action-group').style.display = 'flex';
-        // Sembunyikan tombol hapus untuk orang lain
         document.getElementById('btn-delete-status').style.display = 'none';
       }
     }
@@ -1134,7 +1174,6 @@
         videos: currentViewerVideos
       });
 
-      // Refresh UI likes
       const isLiked = v.likes.includes(currentUser.uid);
       document.getElementById('like-count').textContent = v.likes.length;
       document.getElementById('like-icon').className = isLiked ? "fa-solid fa-heart" : "fa-regular fa-heart";
