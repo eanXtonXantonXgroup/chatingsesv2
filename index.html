@@ -592,7 +592,12 @@
       </div>
 
       <!-- TAB CHATS -->
-      <div id="tab-chats" class="user-list"></div>
+      <div id="tab-chats" class="user-list" style="display:flex; flex-direction:column;">
+        <div style="padding: 10px 16px; border-bottom: 1px solid #334155;">
+          <input type="text" id="search-user-input" class="input-field" style="margin: 0; padding: 8px 12px; font-size: 0.9rem;" placeholder="Cari nama atau username...">
+        </div>
+        <div id="user-list-container" style="flex:1; overflow-y:auto;"></div>
+      </div>
 
       <!-- TAB STATUS -->
       <div id="tab-status" class="status-list" style="display: none;">
@@ -723,6 +728,8 @@
     let isRecording = false;
     let typingTimeout = null;
     let selectedStatusFile = null;
+    let heartbeatInterval = null;
+    let allUsersCache = [];
 
     // --- AUTHENTICATION ---
     document.getElementById('btn-login-google').addEventListener('click', async () => {
@@ -735,6 +742,7 @@
 
     document.getElementById('btn-logout').addEventListener('click', async () => {
       if (currentUser) {
+        clearInterval(heartbeatInterval);
         await updateDoc(doc(db, "users", currentUser.uid), { isOnline: false });
       }
       await signOut(auth);
@@ -754,14 +762,33 @@
           document.getElementById('setup-modal').style.display = 'flex';
         } else {
           currentUserDoc = snap.data();
-          await updateDoc(userRef, { isOnline: true });
+          await updateDoc(userRef, { isOnline: true, lastActive: serverTimestamp() });
+          startHeartbeat();
           initApp();
         }
       } else {
+        clearInterval(heartbeatInterval);
         document.getElementById('login-screen').classList.add('active');
         document.getElementById('app-screen').classList.remove('active');
       }
     });
+
+    // Heartbeat for Accurate Online Status
+    function startHeartbeat() {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+      heartbeatInterval = setInterval(async () => {
+        if (currentUser) {
+          try {
+            await updateDoc(doc(db, "users", currentUser.uid), {
+              isOnline: true,
+              lastActive: serverTimestamp()
+            });
+          } catch (e) {
+            console.error("Heartbeat error:", e);
+          }
+        }
+      }, 20000);
+    }
 
     document.getElementById('btn-save-username').addEventListener('click', async () => {
       const username = document.getElementById('input-username').value.trim();
@@ -776,12 +803,14 @@
         username: username.toLowerCase(),
         bio: 'Hai! Saya menggunakan Chatingses.',
         isOnline: true,
+        lastActive: serverTimestamp(),
         blocked: [],
         lastUsernameChange: Date.now()
       };
       await setDoc(userRef, userData);
       currentUserDoc = userData;
       document.getElementById('setup-modal').style.display = 'none';
+      startHeartbeat();
       initApp();
     });
 
@@ -811,36 +840,74 @@
       listenStatusUpdates();
     }
 
-    // --- LOAD USER LIST (FILTER BLOCKED) ---
+    // --- LOAD USER LIST (ONLINE FIRST & SEARCH) ---
     function loadUsersList() {
       onSnapshot(collection(db, "users"), (snapshot) => {
-        const userListContainer = document.getElementById('tab-chats');
-        userListContainer.innerHTML = '';
-
+        allUsersCache = [];
         snapshot.forEach((docSnap) => {
-          const u = docSnap.data();
-          if (u.uid === currentUser.uid) return;
-
-          // Cek apakah saya memblokir dia atau dia memblokir saya
-          const myBlocked = currentUserDoc.blocked || [];
-          const theirBlocked = u.blocked || [];
-          if (myBlocked.includes(u.uid) || theirBlocked.includes(currentUser.uid)) return;
-
-          const div = document.createElement('div');
-          div.className = 'user-item';
-          div.onclick = () => openChatWith(u);
-          div.innerHTML = `
-            <div class="avatar-wrapper">
-              <img class="avatar" src="${u.photoURL}">
-              <div class="status-dot ${u.isOnline ? 'online' : 'offline'}"></div>
-            </div>
-            <div>
-              <div style="font-weight:600; font-size:0.95rem;">${u.name}</div>
-              <div style="font-size:0.75rem; color:#94a3b8;">@${u.username} • ${u.isOnline ? 'Online' : 'Offline'}</div>
-            </div>
-          `;
-          userListContainer.appendChild(div);
+          allUsersCache.push(docSnap.data());
         });
+        renderUserListView();
+      });
+    }
+
+    document.getElementById('search-user-input').addEventListener('input', () => {
+      renderUserListView();
+    });
+
+    function renderUserListView() {
+      const container = document.getElementById('user-list-container');
+      container.innerHTML = '';
+      const searchText = document.getElementById('search-user-input').value.toLowerCase();
+      const now = Date.now();
+
+      // Filter and Sort: Online users first
+      const filtered = allUsersCache.filter(u => {
+        if (u.uid === currentUser.uid) return false;
+        const myBlocked = currentUserDoc.blocked || [];
+        const theirBlocked = u.blocked || [];
+        if (myBlocked.includes(u.uid) || theirBlocked.includes(currentUser.uid)) return false;
+
+        const matchesSearch = u.name.toLowerCase().includes(searchText) || u.username.toLowerCase().includes(searchText);
+        return matchesSearch;
+      });
+
+      filtered.sort((a, b) => {
+        // Calculate true online state (< 45 seconds since last active)
+        const aTime = a.lastActive ? a.lastActive.toMillis() : 0;
+        const bTime = b.lastActive ? b.lastActive.toMillis() : 0;
+        const aOnline = a.isOnline && (now - aTime < 45000);
+        const bOnline = b.isOnline && (now - bTime < 45000);
+
+        if (aOnline === bOnline) {
+          return a.name.localeCompare(b.name);
+        }
+        return aOnline ? -1 : 1; // Online comes first
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Tidak ada pengguna ditemukan.</div>`;
+        return;
+      }
+
+      filtered.forEach(u => {
+        const aTime = u.lastActive ? u.lastActive.toMillis() : 0;
+        const isReallyOnline = u.isOnline && (now - aTime < 45000);
+
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        div.onclick = () => openChatWith(u);
+        div.innerHTML = `
+          <div class="avatar-wrapper">
+            <img class="avatar" src="${u.photoURL}">
+            <div class="status-dot ${isReallyOnline ? 'online' : 'offline'}"></div>
+          </div>
+          <div>
+            <div style="font-weight:600; font-size:0.95rem;">${u.name}</div>
+            <div style="font-size:0.75rem; color:#94a3b8;">@${u.username} • ${isReallyOnline ? 'Online' : 'Offline'}</div>
+          </div>
+        `;
+        container.appendChild(div);
       });
     }
 
@@ -853,8 +920,12 @@
       
       document.getElementById('active-chat-name').textContent = targetUser.name;
       document.getElementById('active-chat-avatar').src = targetUser.photoURL;
-      document.getElementById('active-chat-status').className = `status-dot ${targetUser.isOnline ? 'online' : 'offline'}`;
-      document.getElementById('active-chat-info').textContent = targetUser.isOnline ? 'Online' : 'Offline';
+      const now = Date.now();
+      const tTime = targetUser.lastActive ? targetUser.lastActive.toMillis() : 0;
+      const isReallyOnline = targetUser.isOnline && (now - tTime < 45000);
+
+      document.getElementById('active-chat-status').className = `status-dot ${isReallyOnline ? 'online' : 'offline'}`;
+      document.getElementById('active-chat-info').textContent = isReallyOnline ? 'Online' : 'Offline';
       
       document.getElementById('chat-input').disabled = false;
       document.getElementById('btn-send-msg').disabled = false;
@@ -970,7 +1041,6 @@
       setDoc(doc(db, "chats", chatId), { typing: false }, { merge: true });
     }
 
-    // Send Image with compression to prevent Firestore limits
     const chatImageInput = document.getElementById('chat-image-input');
     chatImageInput.addEventListener('change', async (e) => {
       const file = e.target.files[0];
@@ -1020,7 +1090,7 @@
       }
     };
 
-    // --- CHAT MENU OPTIONS (Clear History, Clear Everyone, Block) ---
+    // --- CHAT MENU OPTIONS ---
     window.toggleChatMenu = function() {
       const menu = document.getElementById('chat-dropdown-menu');
       menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
@@ -1132,7 +1202,7 @@
       return formatted;
     }
 
-    // --- STATUS SYSTEM (AUTO UPLOAD & 24H FILTER) ---
+    // --- STATUS SYSTEM (AUTO UPLOAD VIA TMPFILES & 24H FILTER) ---
     window.openAddStatusModal = function() {
       document.getElementById('status-add-modal').style.display = 'flex';
     };
@@ -1162,20 +1232,22 @@
       btn.disabled = true;
 
       try {
-        // Auto Upload ke Catbox di balik layar
         const formData = new FormData();
-        formData.append('reqtype', 'fileupload');
-        formData.append('fileToUpload', selectedStatusFile);
+        formData.append('file', selectedStatusFile);
 
-        const response = await fetch('https://catbox.moe/user/api.php', {
+        const response = await fetch('https://tmpfiles.org/api/v1/upload', {
           method: 'POST',
           body: formData
         });
-        const videoUrl = (await response.text()).trim();
 
-        if (!videoUrl.startsWith('http')) {
-          throw new Error("Gagal mengunggah video.");
+        if (!response.ok) throw new Error("Gagal terhubung ke server pengunggah.");
+        const resData = await response.json();
+        
+        if (resData.status !== "success" || !resData.data || !resData.data.url) {
+          throw new Error("Gagal mengunggah status video.");
         }
+
+        const directVideoUrl = resData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
 
         const userStatusRef = doc(db, "statuses", currentUser.uid);
         const snap = await getDoc(userStatusRef);
@@ -1186,7 +1258,7 @@
         }
 
         videos.push({
-          url: videoUrl,
+          url: directVideoUrl,
           caption: caption,
           timestamp: Date.now(),
           viewers: [],
@@ -1223,12 +1295,11 @@
           const data = docSnap.data();
           if (!data.videos) return;
 
-          // Filter hanya video yang dibuat dalam kurun waktu 24 jam terakhir
           const validVideos = data.videos.filter(v => (now - v.timestamp) < twentyFourHours);
           if (validVideos.length === 0) return;
 
           hasStatus = true;
-          data.videos = validVideos; // Update dengan list valid 24 jam
+          data.videos = validVideos;
 
           const div = document.createElement('div');
           div.className = 'status-user-item';
@@ -1288,7 +1359,6 @@
 
       document.getElementById('status-counter-text').textContent = `Status ${currentViewerIndex + 1}/${currentViewerVideos.length}`;
 
-      // Caption status
       const captionBox = document.getElementById('status-caption-display');
       if (v.caption && v.caption.trim() !== '') {
         captionBox.textContent = v.caption;
@@ -1469,7 +1539,7 @@
     // Tab Switcher
     window.switchTab = function(tab) {
       if (tab === 'chats') {
-        document.getElementById('tab-chats').style.display = 'block';
+        document.getElementById('tab-chats').style.display = 'flex';
         document.getElementById('tab-status').style.display = 'none';
         document.getElementById('tab-chats-btn').classList.add('active');
         document.getElementById('tab-status-btn').classList.remove('active');
