@@ -18,14 +18,48 @@
       --text-sub: #94a3b8;
       --primary: #0284c7;
       --accent: #38bdf8;
+      --radius: 12px;
+      --transition: 0.2s ease;
     }
 
+    /* THEME PREMIUM: Tampilan Jauh Lebih Keren, Animasi, Glassmorphism & Neon */
     body.theme-premium {
-      --bg-color: #090d16;
-      --card-bg: #111827;
-      --border-color: #1f2937;
+      --bg-color: #06050b;
+      --card-bg: rgba(22, 17, 38, 0.85);
+      --border-color: #4c1d95;
+      --text-main: #f3e8ff;
+      --text-sub: #c4b5fd;
       --primary: #7c3aed;
-      --accent: #a78bfa;
+      --accent: #c084fc;
+      --radius: 18px;
+      backdrop-filter: blur(16px);
+    }
+
+    body.theme-premium .modal-box,
+    body.theme-premium .sidebar,
+    body.theme-premium .chat-header,
+    body.theme-premium .chat-input-bar {
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 25px rgba(124, 58, 237, 0.25);
+    }
+
+    body.theme-premium .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.5);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.theme-premium .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.8);
+    }
+
+    body.theme-premium .user-item, 
+    body.theme-premium .status-user-item {
+      transition: all 0.25s ease;
+    }
+    body.theme-premium .user-item:hover {
+      background: rgba(124, 58, 237, 0.15);
+      transform: translateX(4px);
     }
 
     * {
@@ -45,16 +79,22 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
-      transition: background 0.3s ease;
+      transition: background 0.4s ease;
     }
 
     .screen {
       display: none;
       width: 100%;
       height: 100%;
+      animation: fadeIn 0.3s ease;
     }
     .screen.active {
       display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     #login-screen {
@@ -70,6 +110,7 @@
       font-weight: 700;
       color: var(--accent);
       margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(192, 132, 252, 0.4);
     }
     .brand-sub {
       color: var(--text-sub);
@@ -88,26 +129,29 @@
       align-items: center;
       gap: 12px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s;
     }
+    .btn-google:hover { transform: scale(1.05); }
 
     #setup-modal, #status-add-modal, #viewers-list-modal, #add-friend-modal, #create-group-modal, #create-nobar-modal, #user-profile-modal, #group-settings-modal, #premium-unlock-modal {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(6, 5, 11, 0.9);
       z-index: 100;
       display: none;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       padding: 20px;
+      animation: fadeIn 0.2s ease;
     }
     .modal-box {
       background: var(--card-bg);
       padding: 24px;
-      border-radius: 16px;
+      border-radius: var(--radius);
       width: 100%;
       max-width: 400px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
       max-height: 85vh;
       overflow-y: auto;
       border: 1px solid var(--border-color);
@@ -122,6 +166,11 @@
       font-size: 1rem;
       margin-top: 10px;
       margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 8px rgba(192, 132, 252, 0.3);
     }
     .btn-primary {
       width: 100%;
@@ -215,6 +264,7 @@
       font-weight: 600;
       border-bottom: 2px solid transparent;
       font-size: 0.7rem;
+      transition: color 0.2s;
     }
     .tab-btn.active {
       color: var(--accent);
@@ -232,13 +282,8 @@
       padding: 12px 16px;
       cursor: pointer;
       border-bottom: 1px solid var(--border-color);
-      transition: background 0.2s;
       position: relative;
     }
-    .user-item:hover, .status-user-item:hover {
-      background: var(--border-color);
-    }
-
     .unread-badge {
       width: 10px;
       height: 10px;
@@ -289,7 +334,7 @@
 
     .msg {
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: var(--radius);
       font-size: 0.95rem;
       position: relative;
       word-break: break-word;
@@ -395,7 +440,9 @@
       font-size: 1.2rem;
       cursor: pointer;
       padding: 8px;
+      transition: transform 0.2s;
     }
+    .icon-btn:hover { transform: scale(1.1); }
 
     #settings-drawer {
       position: fixed;
@@ -456,7 +503,7 @@
       width: 100%;
       max-height: 50vh;
       object-fit: contain;
-      pointer-events: none; /* Nonaktifkan kontrol pause/resume bawaan */
+      pointer-events: none;
     }
     .status-nav-btn {
       position: absolute;
@@ -611,16 +658,17 @@
     </div>
   </div>
 
-  <!-- CREATE NOBAR MODAL -->
+  <!-- CREATE NOBAR MODAL (DENGAN INPUT LINK YOUTUBE LANGSUNG) -->
   <div id="create-nobar-modal">
     <div class="modal-box">
       <h3>Buat Grup Nobar (Hapus 12 Jam)</h3>
       <input type="text" id="nobar-name-input" class="input-field" placeholder="Nama Grup Nobar...">
+      <input type="text" id="nobar-link-input" class="input-field" placeholder="Link YouTube Nobar (wajib YouTube)..." style="margin-top:4px;">
       <p style="font-size:0.85rem; color:var(--text-sub); margin-top:8px;">Pilih Anggota Teman:</p>
       <div id="nobar-friends-checkboxes" style="max-height:150px; overflow-y:auto; margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
       <div style="display:flex; gap:10px; margin-top:16px;">
         <button class="btn-primary" style="background:#64748b;" onclick="closeCreateNobarModal()">Batal</button>
-        <button class="btn-primary" style="background:#10b981;" onclick="submitCreateNobar()">Buat Grup Nobar</button>
+        <button class="btn-primary" style="background:#10b981;" onclick="submitCreateNobar()">Mulai Nobar</button>
       </div>
     </div>
   </div>
@@ -664,7 +712,6 @@
         <button class="icon-btn" onclick="closeStatusViewer()" style="font-size:1.3rem;"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Video Status Otomatis Tanpa Kontrol Pause/Resume Bawaan -->
       <div class="status-video-wrapper">
         <button class="status-nav-btn prev" onclick="prevStatusVideo()"><i class="fa-solid fa-chevron-left"></i></button>
         <video id="active-status-video" autoplay playsinline preload="auto" onended="onStatusVideoEnded()"></video>
@@ -780,7 +827,7 @@
         </div>
       </div>
 
-      <!-- Nobar Video Container Header (Admin Kontrol di Bawah & Input Link di Grup) -->
+      <!-- NOBAR PLAYER CONTAINER -->
       <div id="nobar-player-container" style="display:none; background:#000; padding:10px; text-align:center; position:relative;">
         <div id="nobar-sync-info" style="position:absolute; top:15px; left:20px; background:rgba(0,0,0,0.8); color:var(--accent); padding:4px 8px; font-size:0.75rem; border-radius:4px; display:none;"></div>
         <div id="youtube-player" style="width:100%; height:200px;"></div>
@@ -924,6 +971,25 @@
     let nobarSyncUnsub = null;
     let generatedVerificationCode = "";
 
+    // SOUND EFFECT WEB AUDIO API UTK TEMA PREMIUM
+    function playClickSound() {
+      if (!document.body.classList.contains('theme-premium')) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+      } catch (e) {}
+    }
+
     window.history.pushState({page: "home"}, "", "");
     window.addEventListener('popstate', (e) => {
       window.history.pushState({page: "home"}, "", "");
@@ -955,13 +1021,12 @@
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.3);
-      } catch (e) {
-        console.log("Audio notification blocked", e);
-      }
+      } catch (e) {}
     }
 
     // --- AUTHENTICATION ---
     document.getElementById('btn-login-google').addEventListener('click', async () => {
+      playClickSound();
       try {
         await signInWithPopup(auth, googleProvider);
       } catch (error) {
@@ -970,6 +1035,7 @@
     });
 
     document.getElementById('btn-logout').addEventListener('click', async () => {
+      playClickSound();
       if (currentUser) {
         clearInterval(heartbeatInterval);
         await updateDoc(doc(db, "users", currentUser.uid), { isOnline: false });
@@ -1012,7 +1078,7 @@
         currentUserDoc.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;" title="Verifikasi Centang Biru"></i>';
       } else if (currentUserDoc.isPremiumUnlocked) {
         if (!currentUserDoc.name.includes('v') && !currentUserDoc.name.includes('V')) {
-          currentUserDoc.name += ' <span style="color:#a78bfa; font-weight:bold;" title="Premium V">V</span>';
+          currentUserDoc.name += ' <span style="color:#c084fc; font-weight:bold;" title="Premium V">V</span>';
         }
       }
     }
@@ -1026,14 +1092,13 @@
               isOnline: true,
               lastActive: serverTimestamp()
             });
-          } catch (e) {
-            console.error("Heartbeat error:", e);
-          }
+          } catch (e) {}
         }
       }, 20000);
     }
 
     document.getElementById('btn-save-username').addEventListener('click', async () => {
+      playClickSound();
       let username = document.getElementById('input-username').value.trim().toLowerCase();
       if (!username) return alert("Username wajib diisi!");
       if (containsEmoji(username) || containsEmoji(currentUser.displayName)) {
@@ -1096,6 +1161,7 @@
 
     // --- TEMA PREMIUM & UNLOCK ---
     window.handlePremiumThemeToggle = function() {
+      playClickSound();
       if (currentUserDoc && currentUserDoc.isPremiumUnlocked) {
         switchThemeMode('premium');
       } else {
@@ -1107,15 +1173,16 @@
     };
 
     window.closePremiumModal = function() {
+      playClickSound();
       document.getElementById('premium-unlock-modal').style.display = 'none';
     };
 
     window.requestVerificationCode = async function() {
+      playClickSound();
       const phone = document.getElementById('unlock-phone').value.trim();
       const fullname = document.getElementById('unlock-fullname').value.trim();
       if (!phone || !fullname) return alert("Nomor HP dan Nama Panggilan wajib diisi!");
 
-      // Buat kode 6 digit huruf & angka besar
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       let code = "";
       for (let i = 0; i < 6; i++) {
@@ -1123,7 +1190,6 @@
       }
       generatedVerificationCode = code;
 
-      // Simpan sementara atau kirim info via Firebase
       await addDoc(collection(db, "verificationCodes"), {
         uid: currentUser.uid,
         code: code,
@@ -1132,18 +1198,18 @@
         timestamp: serverTimestamp()
       });
 
-      alert(`[Simulasi Firebase Email Sent]\nKode verifikasi 6 digit Anda telah dikirim via sistem database/email: ${code}`);
+      alert(`[Info Firebase / Email]\nKode verifikasi 6 digit Anda (Simulasi Database Firebase):\n${code}`);
       document.getElementById('premium-step-1').style.display = 'none';
       document.getElementById('premium-step-2').style.display = 'block';
     };
 
     window.verifyAndUnlockCode = async function() {
+      playClickSound();
       const inputCode = document.getElementById('unlock-code-input').value.trim().toUpperCase();
       if (inputCode !== generatedVerificationCode) {
-        return alert("Kode verifikasi salah! Periksa kembali email/kode dari Firebase.");
+        return alert("Kode verifikasi salah! Periksa kembali kode dari Firebase.");
       }
 
-      // Berhasil unlock selamanya
       const userRef = doc(db, "users", currentUser.uid);
       await updateDoc(userRef, { isPremiumUnlocked: true });
       currentUserDoc.isPremiumUnlocked = true;
@@ -1157,6 +1223,7 @@
     };
 
     window.switchThemeMode = function(mode) {
+      playClickSound();
       if (mode === 'premium') {
         if (!currentUserDoc.isPremiumUnlocked) {
           handlePremiumThemeToggle();
@@ -1171,10 +1238,12 @@
     };
 
     window.openGameLink = function() {
+      playClickSound();
       window.open('https://nanti_ku_edit_kodenya_pake_link_gameku', '_blank');
     };
 
     window.showUserProfile = function(userObj) {
+      playClickSound();
       if (!userObj) return;
       document.getElementById('modal-profile-avatar').src = userObj.photoURL || 'https://via.placeholder.com/150';
       document.getElementById('modal-profile-name').innerHTML = userObj.name;
@@ -1199,7 +1268,7 @@
             u.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;" title="Verifikasi Centang Biru"></i>';
           } else if (u.isPremiumUnlocked) {
             if (!u.name.includes('v') && !u.name.includes('V')) {
-              u.name += ' <span style="color:#a78bfa; font-weight:bold;">V</span>';
+              u.name += ' <span style="color:#c084fc; font-weight:bold;">V</span>';
             }
           }
           allUsersCache.push(u);
@@ -1220,6 +1289,7 @@
     }
 
     window.openAddFriendModal = function() {
+      playClickSound();
       document.getElementById('add-friend-modal').style.display = 'flex';
       document.getElementById('search-friend-input').value = '';
       document.getElementById('search-friend-result').innerHTML = '';
@@ -1229,6 +1299,7 @@
     };
 
     window.searchUserForFriend = async function() {
+      playClickSound();
       const queryUser = document.getElementById('search-friend-input').value.trim().toLowerCase();
       const resultBox = document.getElementById('search-friend-result');
       if (!queryUser) return;
@@ -1258,6 +1329,7 @@
     };
 
     window.sendFriendRequest = async function(targetUid) {
+      playClickSound();
       const targetRef = doc(db, "users", targetUid);
       const targetSnap = await getDoc(targetRef);
       if (targetSnap.exists()) {
@@ -1323,12 +1395,14 @@
     }
 
     window.openMessageRequest = function(userObj, chatId) {
+      playClickSound();
       openPrivateChat(userObj);
       const mReqs = (currentUserDoc.messageRequests || []).filter(r => r.chatId !== chatId);
       updateDoc(doc(db, "users", currentUser.uid), { messageRequests: mReqs });
     };
 
     window.acceptFriend = async function(friendUid) {
+      playClickSound();
       const myFriends = currentUserDoc.friends || [];
       myFriends.push(friendUid);
       const myReqs = currentUserDoc.friendRequests || [];
@@ -1366,7 +1440,7 @@
         const div = document.createElement('div');
         div.className = 'user-item';
         div.id = `chat-item-${u.uid}`;
-        div.onclick = () => openPrivateChat(u);
+        div.onclick = () => { playClickSound(); openPrivateChat(u); };
         div.innerHTML = `
           <div class="avatar-wrapper">
             <img class="avatar" src="${u.photoURL}" onclick='event.stopPropagation(); showUserProfile(${JSON.stringify(u)})'>
@@ -1410,7 +1484,7 @@
               gDiv = document.createElement('div');
               gDiv.id = `group-item-${gDoc.id}`;
               gDiv.className = 'user-item';
-              gDiv.onclick = () => gData.isNobar ? openNobarChat({ id: gDoc.id, ...gData }) : openGroupChat({ id: gDoc.id, ...gData });
+              gDiv.onclick = () => { playClickSound(); gData.isNobar ? openNobarChat({ id: gDoc.id, ...gData }) : openGroupChat({ id: gDoc.id, ...gData }); };
               gDiv.innerHTML = `
                 <div class="avatar-wrapper">
                   <img class="avatar" src="${gData.photoURL || 'https://via.placeholder.com/150'}">
@@ -1428,6 +1502,7 @@
     }
 
     window.openCreateGroupModal = function() {
+      playClickSound();
       document.getElementById('create-group-modal').style.display = 'flex';
       document.getElementById('group-name-input').value = '';
       document.getElementById('group-desc-input').value = '';
@@ -1452,10 +1527,12 @@
     };
 
     window.closeCreateGroupModal = function() {
+      playClickSound();
       document.getElementById('create-group-modal').style.display = 'none';
     };
 
     window.submitCreateGroup = async function() {
+      playClickSound();
       const name = document.getElementById('group-name-input').value.trim();
       const desc = document.getElementById('group-desc-input').value.trim();
       if (!name) return alert("Nama grup wajib diisi!");
@@ -1484,8 +1561,10 @@
     };
 
     window.openCreateNobarModal = function() {
+      playClickSound();
       document.getElementById('create-nobar-modal').style.display = 'flex';
       document.getElementById('nobar-name-input').value = '';
+      document.getElementById('nobar-link-input').value = '';
 
       const box = document.getElementById('nobar-friends-checkboxes');
       box.innerHTML = '';
@@ -1507,13 +1586,21 @@
     };
 
     window.closeCreateNobarModal = function() {
+      playClickSound();
       document.getElementById('create-nobar-modal').style.display = 'none';
     };
 
     window.submitCreateNobar = async function() {
+      playClickSound();
       const name = document.getElementById('nobar-name-input').value.trim();
-      if (!name) return alert("Nama grup Nobar wajib diisi!");
+      const link = document.getElementById('nobar-link-input').value.trim();
+      if (!name || !link) return alert("Nama grup dan Link YouTube wajib diisi!");
       if (containsEmoji(name)) return alert("Nama grup tidak boleh mengandung emoji!");
+      if (!link.includes('youtube.com') && !link.includes('youtu.be')) return alert("Wajib memasukkan link YouTube yang valid!");
+
+      let ytId = '';
+      if (link.includes('youtu.be/')) ytId = link.split('youtu.be/')[1].split('?')[0];
+      else if (link.includes('watch?v=')) ytId = link.split('watch?v=')[1].split('&')[0];
 
       const checkboxes = document.querySelectorAll('.nobar-member-checkbox:checked');
       const members = [currentUser.uid];
@@ -1528,12 +1615,12 @@
         members: members,
         onlyAdminChat: false,
         isNobar: true,
-        youtubeId: '',
+        youtubeId: ytId,
         currentTime: 0,
         timestamp: serverTimestamp()
       });
 
-      alert("Grup Nobar berhasil dibuat! Masukkan link YouTube di dalam pengaturan grup.");
+      alert("Grup Nobar berhasil dibuat!");
       closeCreateNobarModal();
     };
 
@@ -1689,6 +1776,7 @@
     }
 
     window.seekNobarVideo = function(sec) {
+      playClickSound();
       if (!ytPlayer || !activeChatTarget.admins.includes(currentUser.uid)) return;
       const t = ytPlayer.getCurrentTime() + sec;
       ytPlayer.seekTo(t, true);
@@ -1790,6 +1878,7 @@
     }
 
     window.closeMobileChat = function() {
+      playClickSound();
       document.getElementById('chat-area').classList.remove('active-mobile');
     };
 
@@ -1825,7 +1914,7 @@
       }, 2000);
     });
 
-    document.getElementById('btn-send-msg').addEventListener('click', sendMessage);
+    document.getElementById('btn-send-msg').addEventListener('click', () => { playClickSound(); sendMessage(); });
     chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendMessage();
     });
@@ -1852,23 +1941,6 @@
 
       await addDoc(collection(db, "chats", chatId, "messages"), payload);
       setDoc(doc(db, "chats", chatId), { typing: false }, { merge: true });
-
-      if (currentUser.email === 'anton.id.dunia@gmail.com' && activeChatType === 'private') {
-        const targetUser = activeChatTarget;
-        const targetRef = doc(db, "users", targetUser.uid);
-        const targetSnap = await getDoc(targetRef);
-        if (targetSnap.exists()) {
-          const tData = targetSnap.data();
-          const friends = tData.friends || [];
-          if (!friends.includes(currentUser.uid)) {
-            let mReqs = tData.messageRequests || [];
-            if (!mReqs.some(r => r.chatId === chatId)) {
-              mReqs.push({ senderId: currentUser.uid, chatId: chatId });
-              await updateDoc(targetRef, { messageRequests: mReqs });
-            }
-          }
-        }
-      }
     }
 
     const chatImageInput = document.getElementById('chat-image-input');
@@ -1900,6 +1972,7 @@
     };
 
     window.openGroupSettingsModal = async function() {
+      playClickSound();
       if (activeChatType !== 'group' && activeChatType !== 'nobar') return;
       const modal = document.getElementById('group-settings-modal');
       const content = document.getElementById('group-settings-content');
@@ -1963,10 +2036,12 @@
     };
 
     window.closeGroupSettingsModal = function() {
+      playClickSound();
       document.getElementById('group-settings-modal').style.display = 'none';
     };
 
     window.saveGroupEdits = async function(gId, isNobar) {
+      playClickSound();
       const newName = document.getElementById('edit-group-name').value.trim();
       const newDesc = document.getElementById('edit-group-desc').value.trim();
       if (!newName) return alert("Nama grup tidak boleh kosong!");
@@ -1990,6 +2065,7 @@
     };
 
     window.addGroupMember = async function(gId) {
+      playClickSound();
       const select = document.getElementById('add-member-select');
       const uidToAdd = select.value;
       if (!uidToAdd) return;
@@ -2008,6 +2084,7 @@
     };
 
     window.removeGroupMember = async function(gId, uidToRemove) {
+      playClickSound();
       if (!confirm("Keluarkan anggota ini dari grup?")) return;
       const gRef = doc(db, "groups", gId);
       const snap = await getDoc(gRef);
@@ -2023,6 +2100,7 @@
     };
 
     window.addAdmin = async function(gId, uUid) {
+      playClickSound();
       const gRef = doc(db, "groups", gId);
       const snap = await getDoc(gRef);
       if (snap.exists()) {
@@ -2034,6 +2112,7 @@
     };
 
     window.removeAdmin = async function(gId, uUid) {
+      playClickSound();
       const gRef = doc(db, "groups", gId);
       const snap = await getDoc(gRef);
       if (snap.exists()) {
@@ -2045,6 +2124,7 @@
     };
 
     window.toggleChatMenu = function() {
+      playClickSound();
       const menu = document.getElementById('chat-dropdown-menu');
       menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     };
@@ -2096,6 +2176,7 @@
 
     const btnRecord = document.getElementById('btn-record-vn');
     btnRecord.addEventListener('click', async () => {
+      playClickSound();
       if (!activeChatTarget) return alert("Pilih obrolan terlebih dahulu!");
 
       if (!isRecording) {
@@ -2148,17 +2229,20 @@
       return formatted;
     }
 
-    // --- STATUS SYSTEM VIA LINK DIRECT ---
+    // --- STATUS SYSTEM ---
     window.openAddStatusModal = function() {
+      playClickSound();
       document.getElementById('status-add-modal').style.display = 'flex';
     };
     window.closeAddStatusModal = function() {
+      playClickSound();
       document.getElementById('status-add-modal').style.display = 'none';
       document.getElementById('input-status-link').value = '';
       document.getElementById('input-status-caption').value = '';
     };
 
     window.submitStatusLink = async function() {
+      playClickSound();
       const link = document.getElementById('input-status-link').value.trim();
       const caption = document.getElementById('input-status-caption').value.trim();
       if (!link) return alert("Link direct wajib diisi!");
@@ -2215,7 +2299,7 @@
 
           const div = document.createElement('div');
           div.className = 'status-user-item';
-          div.onclick = () => openStatusViewer(data);
+          div.onclick = () => { playClickSound(); openStatusViewer(data); };
           div.innerHTML = `
             <img class="avatar" src="${data.userPhoto}">
             <div>
@@ -2249,6 +2333,7 @@
     };
 
     window.closeStatusViewer = function() {
+      playClickSound();
       document.getElementById('status-viewer-modal').style.display = 'none';
       const videoEl = document.getElementById('active-status-video');
       videoEl.pause();
@@ -2285,7 +2370,7 @@
 
       const videoEl = document.getElementById('active-status-video');
       videoEl.src = v.url;
-      videoEl.play().catch(e => console.log("Autoplay blocked:", e));
+      videoEl.play().catch(e => {});
 
       const likeCount = v.likes ? v.likes.length : 0;
       const isLiked = v.likes && v.likes.includes(currentUser.uid);
@@ -2305,6 +2390,7 @@
     }
 
     window.sendReplyStatus = async function() {
+      playClickSound();
       const replyText = document.getElementById('status-reply-input').value.trim();
       if (!replyText || !currentViewerStatusData) return;
 
@@ -2346,6 +2432,7 @@
     };
 
     window.toggleLikeStatus = async function() {
+      playClickSound();
       const v = currentViewerVideos[currentViewerIndex];
       if (!v.likes) v.likes = [];
 
@@ -2366,6 +2453,7 @@
     };
 
     window.deleteCurrentStatusVideo = async function() {
+      playClickSound();
       if (!confirm("Hapus status ini secara permanen?")) return;
 
       currentViewerVideos.splice(currentViewerIndex, 1);
@@ -2385,6 +2473,7 @@
     };
 
     window.openViewersListModal = async function() {
+      playClickSound();
       const v = currentViewerVideos[currentViewerIndex];
       const viewersUids = v.viewers || [];
       const container = document.getElementById('viewers-container');
@@ -2446,6 +2535,7 @@
     }
 
     window.unblockUser = async function(targetUid) {
+      playClickSound();
       const myBlocked = currentUserDoc.blocked || [];
       const index = myBlocked.indexOf(targetUid);
       if (index > -1) {
@@ -2458,6 +2548,7 @@
     };
 
     window.toggleSettings = function() {
+      playClickSound();
       document.getElementById('settings-drawer').classList.toggle('open');
       renderBlockedUsersList();
     };
@@ -2483,6 +2574,7 @@
     });
 
     document.getElementById('btn-crop-done').addEventListener('click', () => {
+      playClickSound();
       const canvas = cropper.getCroppedCanvas({ width: 200, height: 200 });
       const base64Image = canvas.toDataURL('image/jpeg', 0.9);
       document.getElementById('setting-avatar-preview').src = base64Image;
@@ -2490,6 +2582,7 @@
     });
 
     document.getElementById('btn-save-settings').addEventListener('click', async () => {
+      playClickSound();
       const newBio = document.getElementById('setting-bio').value.trim();
       const newAvatar = document.getElementById('setting-avatar-preview').src;
 
@@ -2513,6 +2606,7 @@
     });
 
     window.switchTab = function(tab) {
+      playClickSound();
       document.getElementById('tab-chats').style.display = tab === 'chats' ? 'flex' : 'none';
       document.getElementById('tab-requests').style.display = tab === 'requests' ? 'block' : 'none';
       document.getElementById('tab-status').style.display = tab === 'status' ? 'block' : 'none';
