@@ -10,6 +10,24 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
   <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --primary: #0284c7;
+      --accent: #38bdf8;
+    }
+
+    body.theme-premium {
+      --bg-color: #090d16;
+      --card-bg: #111827;
+      --border-color: #1f2937;
+      --primary: #7c3aed;
+      --accent: #a78bfa;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -20,13 +38,14 @@
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #0f172a;
-      color: #f8fafc;
+      background-color: var(--bg-color);
+      color: var(--text-main);
       height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
       overflow: hidden;
+      transition: background 0.3s ease;
     }
 
     .screen {
@@ -42,18 +61,18 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+      background: radial-gradient(circle at center, var(--card-bg) 0%, var(--bg-color) 100%);
       text-align: center;
       padding: 20px;
     }
     .brand-title {
       font-size: 3rem;
       font-weight: 700;
-      color: #38bdf8;
+      color: var(--accent);
       margin-bottom: 8px;
     }
     .brand-sub {
-      color: #94a3b8;
+      color: var(--text-sub);
       margin-bottom: 30px;
     }
     .btn-google {
@@ -71,7 +90,7 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
-    #setup-modal, #status-add-modal, #viewers-list-modal, #add-friend-modal, #create-group-modal, #create-nobar-modal, #user-profile-modal, #group-settings-modal {
+    #setup-modal, #status-add-modal, #viewers-list-modal, #add-friend-modal, #create-group-modal, #create-nobar-modal, #user-profile-modal, #group-settings-modal, #premium-unlock-modal {
       position: fixed;
       inset: 0;
       background: rgba(15, 23, 42, 0.95);
@@ -83,7 +102,7 @@
       padding: 20px;
     }
     .modal-box {
-      background: #1e293b;
+      background: var(--card-bg);
       padding: 24px;
       border-radius: 16px;
       width: 100%;
@@ -91,12 +110,13 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       max-height: 85vh;
       overflow-y: auto;
+      border: 1px solid var(--border-color);
     }
     .input-field {
       width: 100%;
       padding: 12px 16px;
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       color: #fff;
       font-size: 1rem;
@@ -106,7 +126,7 @@
     .btn-primary {
       width: 100%;
       padding: 12px;
-      background: #0284c7;
+      background: var(--primary);
       color: white;
       border: none;
       border-radius: 8px;
@@ -122,8 +142,8 @@
 
     .sidebar {
       width: 320px;
-      background: #1e293b;
-      border-right: 1px solid #334155;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
     }
@@ -145,11 +165,11 @@
 
     .sidebar-header {
       padding: 16px;
-      background: #0f172a;
+      background: var(--bg-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border-color);
     }
     .user-profile-summary {
       display: flex;
@@ -166,7 +186,7 @@
       height: 42px;
       border-radius: 50%;
       object-fit: cover;
-      background: #334155;
+      background: var(--border-color);
     }
     .status-dot {
       width: 12px;
@@ -175,30 +195,30 @@
       position: absolute;
       bottom: 0;
       right: 0;
-      border: 2px solid #1e293b;
+      border: 2px solid var(--card-bg);
     }
     .status-dot.online { background: #22c55e; }
     .status-dot.offline { background: #64748b; }
 
     .nav-tabs {
       display: flex;
-      background: #0f172a;
-      border-bottom: 1px solid #334155;
+      background: var(--bg-color);
+      border-bottom: 1px solid var(--border-color);
     }
     .tab-btn {
       flex: 1;
       padding: 12px 6px;
       background: none;
       border: none;
-      color: #94a3b8;
+      color: var(--text-sub);
       cursor: pointer;
       font-weight: 600;
       border-bottom: 2px solid transparent;
       font-size: 0.7rem;
     }
     .tab-btn.active {
-      color: #38bdf8;
-      border-bottom-color: #38bdf8;
+      color: var(--accent);
+      border-bottom-color: var(--accent);
     }
 
     .user-list, .status-list {
@@ -211,12 +231,12 @@
       gap: 12px;
       padding: 12px 16px;
       cursor: pointer;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border-color);
       transition: background 0.2s;
       position: relative;
     }
     .user-item:hover, .status-user-item:hover {
-      background: #334155;
+      background: var(--border-color);
     }
 
     .unread-badge {
@@ -233,15 +253,15 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      background: #0f172a;
+      background: var(--bg-color);
     }
     .chat-header {
       padding: 12px 20px;
-      background: #1e293b;
+      background: var(--card-bg);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border-color);
     }
     .chat-messages {
       flex: 1;
@@ -277,13 +297,13 @@
       width: 100%;
     }
     .msg-row.sent .msg {
-      background: #0284c7;
+      background: var(--primary);
       color: white;
       border-bottom-right-radius: 2px;
     }
     .msg-row.received .msg {
-      background: #1e293b;
-      color: #f8fafc;
+      background: var(--card-bg);
+      color: var(--text-main);
       border-bottom-left-radius: 2px;
     }
     .msg img {
@@ -304,7 +324,7 @@
     .msg-sender-name {
       font-size: 0.75rem;
       font-weight: 700;
-      color: #38bdf8;
+      color: var(--accent);
       margin-bottom: 2px;
     }
     .msg-actions {
@@ -320,7 +340,7 @@
 
     .quoted-box {
       background: rgba(0,0,0,0.2);
-      border-left: 3px solid #38bdf8;
+      border-left: 3px solid var(--accent);
       padding: 4px 8px;
       border-radius: 4px;
       font-size: 0.8rem;
@@ -332,11 +352,11 @@
     .msg i { font-style: italic; }
     .msg s { text-decoration: line-through; }
     .msg small { font-size: 0.8em; }
-    .msg a { color: #38bdf8; text-decoration: underline; }
+    .msg a { color: var(--accent); text-decoration: underline; }
 
     .typing-indicator {
       font-size: 0.85rem;
-      color: #38bdf8;
+      color: var(--accent);
       font-style: italic;
       padding: 4px 20px;
       height: 24px;
@@ -344,9 +364,9 @@
 
     #reply-preview-bar {
       display: none;
-      background: #1e293b;
+      background: var(--card-bg);
       padding: 8px 16px;
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border-color);
       justify-content: space-between;
       align-items: center;
       font-size: 0.85rem;
@@ -354,24 +374,24 @@
 
     .chat-input-bar {
       padding: 12px;
-      background: #1e293b;
+      background: var(--card-bg);
       display: flex;
       align-items: center;
       gap: 10px;
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border-color);
     }
     .chat-input-bar input[type="text"] {
       flex: 1;
       padding: 12px;
-      background: #0f172a;
-      border: 1px solid #334155;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
       border-radius: 24px;
       color: white;
     }
     .icon-btn {
       background: none;
       border: none;
-      color: #38bdf8;
+      color: var(--accent);
       font-size: 1.2rem;
       cursor: pointer;
       padding: 8px;
@@ -383,14 +403,14 @@
       left: -350px;
       width: 340px;
       height: 100%;
-      background: #1e293b;
+      background: var(--card-bg);
       z-index: 90;
       transition: left 0.3s ease;
       padding: 20px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      border-right: 1px solid #334155;
+      border-right: 1px solid var(--border-color);
       overflow-y: auto;
     }
     #settings-drawer.open { left: 0; }
@@ -436,6 +456,7 @@
       width: 100%;
       max-height: 50vh;
       object-fit: contain;
+      pointer-events: none; /* Nonaktifkan kontrol pause/resume bawaan */
     }
     .status-nav-btn {
       position: absolute;
@@ -493,8 +514,8 @@
       border-radius: 12px;
     }
     .status-action-btn {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       color: white;
       padding: 8px 14px;
       border-radius: 8px;
@@ -523,9 +544,33 @@
   <div id="setup-modal">
     <div class="modal-box">
       <h3>Buat Username Anda</h3>
-      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Username unik untuk profil Anda (tanpa emoji).</p>
+      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top:4px;">Username unik untuk profil Anda (tanpa emoji).</p>
       <input type="text" id="input-username" class="input-field" placeholder="contoh: alex_99">
       <button class="btn-primary" id="btn-save-username">Simpan & Lanjutkan</button>
+    </div>
+  </div>
+
+  <!-- PREMIUM UNLOCK MODAL -->
+  <div id="premium-unlock-modal">
+    <div class="modal-box" id="premium-step-1">
+      <h3>Unlock Tema Premium</h3>
+      <p style="font-size:0.85rem; color:var(--text-sub); margin-top:4px;">Masukkan nomor HP dan nama panggilan asli Anda.</p>
+      <input type="text" id="unlock-phone" class="input-field" placeholder="Nomor HP (contoh: 08123456789)">
+      <input type="text" id="unlock-fullname" class="input-field" placeholder="Nama Panggilan Asli">
+      <div style="display:flex; gap:10px;">
+        <button class="btn-primary" style="background:#64748b;" onclick="closePremiumModal()">Batal</button>
+        <button class="btn-primary" onclick="requestVerificationCode()">Dapatkan Kode</button>
+      </div>
+    </div>
+    
+    <div class="modal-box" id="premium-step-2" style="display:none;">
+      <h3>Masukkan Kode Verifikasi</h3>
+      <p style="font-size:0.85rem; color:var(--accent); margin-top:4px;">Periksa kode 6 digit (huruf & angka besar) dari email / Firebase.</p>
+      <input type="text" id="unlock-code-input" class="input-field" placeholder="KODE 6 DIGIT" style="text-transform:uppercase; text-align:center; font-size:1.2rem; letter-spacing:4px;">
+      <div style="display:flex; gap:10px;">
+        <button class="btn-primary" style="background:#64748b;" onclick="closePremiumModal()">Batal</button>
+        <button class="btn-primary" onclick="verifyAndUnlockCode()">Verifikasi & Aktifkan</button>
+      </div>
     </div>
   </div>
 
@@ -534,8 +579,8 @@
     <div class="modal-box" style="text-align:center;">
       <img id="modal-profile-avatar" class="avatar" style="width:90px; height:90px; margin-bottom:12px;" src="">
       <h3 id="modal-profile-name">-</h3>
-      <p id="modal-profile-username" style="color:#38bdf8; font-size:0.85rem; margin-top:2px;">@-</p>
-      <p id="modal-profile-bio" style="color:#94a3b8; font-size:0.9rem; margin-top:12px; background:#0f172a; padding:10px; border-radius:8px;"></p>
+      <p id="modal-profile-username" style="color:var(--accent); font-size:0.85rem; margin-top:2px;">@-</p>
+      <p id="modal-profile-bio" style="color:var(--text-sub); font-size:0.9rem; margin-top:12px; background:var(--bg-color); padding:10px; border-radius:8px;"></p>
       <button class="btn-primary" style="margin-top:16px;" onclick="closeUserProfileModal()">Tutup</button>
     </div>
   </div>
@@ -557,7 +602,7 @@
       <h3>Buat Grup Baru</h3>
       <input type="text" id="group-name-input" class="input-field" placeholder="Nama Grup (tanpa emoji)...">
       <input type="text" id="group-desc-input" class="input-field" placeholder="Deskripsi Grup...">
-      <p style="font-size:0.85rem; color:#94a3b8; margin-top:8px;">Pilih Anggota Teman:</p>
+      <p style="font-size:0.85rem; color:var(--text-sub); margin-top:8px;">Pilih Anggota Teman:</p>
       <div id="group-friends-checkboxes" style="max-height:150px; overflow-y:auto; margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
       <div style="display:flex; gap:10px; margin-top:16px;">
         <button class="btn-primary" style="background:#64748b;" onclick="closeCreateGroupModal()">Batal</button>
@@ -571,12 +616,11 @@
     <div class="modal-box">
       <h3>Buat Grup Nobar (Hapus 12 Jam)</h3>
       <input type="text" id="nobar-name-input" class="input-field" placeholder="Nama Grup Nobar...">
-      <input type="text" id="nobar-link-input" class="input-field" placeholder="Link YouTube Nobar (wajib YouTube)...">
-      <p style="font-size:0.85rem; color:#94a3b8; margin-top:8px;">Pilih Anggota Teman:</p>
+      <p style="font-size:0.85rem; color:var(--text-sub); margin-top:8px;">Pilih Anggota Teman:</p>
       <div id="nobar-friends-checkboxes" style="max-height:150px; overflow-y:auto; margin-top:8px; display:flex; flex-direction:column; gap:6px;"></div>
       <div style="display:flex; gap:10px; margin-top:16px;">
         <button class="btn-primary" style="background:#64748b;" onclick="closeCreateNobarModal()">Batal</button>
-        <button class="btn-primary" style="background:#10b981;" onclick="submitCreateNobar()">Mulai Nobar</button>
+        <button class="btn-primary" style="background:#10b981;" onclick="submitCreateNobar()">Buat Grup Nobar</button>
       </div>
     </div>
   </div>
@@ -585,7 +629,7 @@
   <div id="status-add-modal">
     <div class="modal-box">
       <h3>Tambah Status Link Direct</h3>
-      <p style="font-size: 0.85rem; color: #94a3b8; margin-top:4px;">Tempel link direct MP4 (Catbox atau link langsung)</p>
+      <p style="font-size: 0.85rem; color: var(--text-sub); margin-top:4px;">Tempel link direct MP4 (Catbox atau link langsung)</p>
       <input type="text" id="input-status-link" class="input-field" placeholder="https://files.catbox.moe/...">
       <input type="text" id="input-status-caption" class="input-field" placeholder="Tulis deskripsi / caption status..." style="margin-top:4px; margin-bottom:16px;">
       <div style="display:flex; gap:10px;">
@@ -614,22 +658,23 @@
           <img id="viewer-owner-avatar" class="avatar" style="width:36px; height:36px;">
           <div>
             <div id="viewer-owner-name" style="font-weight:600; font-size:0.9rem;">-</div>
-            <div id="status-counter-text" style="font-size:0.75rem; color:#38bdf8;">Status 1/1</div>
+            <div id="status-counter-text" style="font-size:0.75rem; color:var(--accent);">Status 1/1</div>
           </div>
         </div>
         <button class="icon-btn" onclick="closeStatusViewer()" style="font-size:1.3rem;"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
+      <!-- Video Status Otomatis Tanpa Kontrol Pause/Resume Bawaan -->
       <div class="status-video-wrapper">
         <button class="status-nav-btn prev" onclick="prevStatusVideo()"><i class="fa-solid fa-chevron-left"></i></button>
-        <video id="active-status-video" autoplay playsinline controls preload="auto" onended="onStatusVideoEnded()"></video>
+        <video id="active-status-video" autoplay playsinline preload="auto" onended="onStatusVideoEnded()"></video>
         <button class="status-nav-btn next" onclick="nextStatusVideo()"><i class="fa-solid fa-chevron-right"></i></button>
       </div>
 
       <div id="status-caption-display" class="status-caption-box" style="display:none;"></div>
 
       <div class="status-reply-bar" id="status-reply-container">
-        <div id="replying-status-preview" style="font-size:0.75rem; color:#38bdf8; background:#0f172a; padding:4px 8px; border-radius:4px; border-left:3px solid #38bdf8;">Membalas status</div>
+        <div id="replying-status-preview" style="font-size:0.75rem; color:var(--accent); background:var(--bg-color); padding:4px 8px; border-radius:4px; border-left:3px solid var(--accent);">Membalas status</div>
         <div class="status-reply-inner">
           <input type="text" id="status-reply-input" placeholder="Balas status...">
           <button class="icon-btn" onclick="sendReplyStatus()"><i class="fa-solid fa-paper-plane"></i></button>
@@ -643,7 +688,7 @@
 
         <div id="owner-action-group" style="display:flex; gap:8px; align-items:center;">
           <button class="status-action-btn" onclick="openViewersListModal()">
-            <i class="fa-solid fa-eye" style="color:#38bdf8;"></i> <span id="viewers-count">0</span>
+            <i class="fa-solid fa-eye" style="color:var(--accent);"></i> <span id="viewers-count">0</span>
           </button>
           <button class="status-action-btn delete" id="btn-delete-status" onclick="deleteCurrentStatusVideo()" title="Hapus Status">
             <i class="fa-solid fa-trash-can"></i>
@@ -666,7 +711,7 @@
           </div>
           <div>
             <div id="my-name" style="font-weight:600; font-size:0.95rem;">-</div>
-            <div id="my-username-display" style="font-size:0.75rem; color:#94a3b8;">@-</div>
+            <div id="my-username-display" style="font-size:0.75rem; color:var(--text-sub);">@-</div>
           </div>
         </div>
         <button class="icon-btn" id="btn-open-settings"><i class="fa-solid fa-gear"></i></button>
@@ -676,11 +721,12 @@
         <button class="tab-btn active" id="tab-chats-btn" onclick="switchTab('chats')">Obrolan</button>
         <button class="tab-btn" id="tab-requests-btn" onclick="switchTab('requests')">Permintaan</button>
         <button class="tab-btn" id="tab-status-btn" onclick="switchTab('status')">Status</button>
+        <button class="tab-btn" id="tab-game-btn" onclick="openGameLink()" style="display:none; color:#f59e0b;"><i class="fa-solid fa-gamepad"></i> Game</button>
       </div>
 
       <!-- TAB CHATS, GROUPS & NOBAR -->
       <div id="tab-chats" class="user-list" style="display:flex; flex-direction:column;">
-        <div style="padding: 10px 16px; display:flex; gap:6px; flex-wrap:wrap; border-bottom: 1px solid #334155;">
+        <div style="padding: 10px 16px; display:flex; gap:6px; flex-wrap:wrap; border-bottom: 1px solid var(--border-color);">
           <button class="btn-primary" style="font-size:0.75rem; padding:6px; flex:1;" onclick="openAddFriendModal()"><i class="fa-solid fa-user-plus"></i> Teman</button>
           <button class="btn-primary" style="font-size:0.75rem; padding:6px; background:#10b981; flex:1;" onclick="openCreateGroupModal()"><i class="fa-solid fa-users"></i> Grup</button>
           <button class="btn-primary" style="font-size:0.75rem; padding:6px; background:#f59e0b; flex:1;" onclick="openCreateNobarModal()"><i class="fa-solid fa-film"></i> Nobar</button>
@@ -690,10 +736,10 @@
 
       <!-- TAB REQUESTS & PENDING MESSAGES -->
       <div id="tab-requests" class="user-list" style="display:none;">
-        <div style="padding:10px 16px; font-weight:600; font-size:0.85rem; color:#38bdf8;">Permintaan Pertemanan</div>
+        <div style="padding:10px 16px; font-weight:600; font-size:0.85rem; color:var(--accent);">Permintaan Pertemanan</div>
         <div id="friend-requests-container"></div>
-        <hr style="border-color:#334155; margin:10px 0;">
-        <div style="padding:10px 16px; font-weight:600; font-size:0.85rem; color:#38bdf8;">Permintaan Pesan</div>
+        <hr style="border-color:var(--border-color); margin:10px 0;">
+        <div style="padding:10px 16px; font-weight:600; font-size:0.85rem; color:var(--accent);">Permintaan Pesan</div>
         <div id="message-requests-container"></div>
       </div>
 
@@ -719,24 +765,24 @@
           </div>
           <div>
             <div id="active-chat-name" style="font-weight:600;">Pilih Obrolan</div>
-            <div id="active-chat-info" style="font-size:0.75rem; color:#94a3b8;">-</div>
+            <div id="active-chat-info" style="font-size:0.75rem; color:var(--text-sub);">-</div>
           </div>
         </div>
         
         <div style="position:relative;">
           <button class="icon-btn" onclick="toggleChatMenu()"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-          <div id="chat-dropdown-menu" style="display:none; position:absolute; right:0; top:35px; background:#1e293b; border:1px solid #334155; border-radius:8px; width:200px; z-index:60; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
-            <div style="padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid #334155;" onclick="clearChatHistory()">Hapus History Chat</div>
-            <div style="padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid #334155;" onclick="clearChatEveryone()">Hapus Chat Semua Orang</div>
-            <div id="group-settings-option" style="display:none; padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid #334155; color:#38bdf8;" onclick="openGroupSettingsModal()">Pengaturan Grup</div>
+          <div id="chat-dropdown-menu" style="display:none; position:absolute; right:0; top:35px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; width:200px; z-index:60; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+            <div style="padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid var(--border-color);" onclick="clearChatHistory()">Hapus History Chat</div>
+            <div style="padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid var(--border-color);" onclick="clearChatEveryone()">Hapus Chat Semua Orang</div>
+            <div id="group-settings-option" style="display:none; padding:10px 14px; font-size:0.85rem; cursor:pointer; border-bottom:1px solid var(--border-color); color:var(--accent);" onclick="openGroupSettingsModal()">Pengaturan Grup</div>
             <div id="block-menu-btn" style="padding:10px 14px; font-size:0.85rem; cursor:pointer; color:#ef4444;" onclick="toggleBlockUser()">Blokir Pengguna</div>
           </div>
         </div>
       </div>
 
-      <!-- Nobar Video Container Header (Kontrol Admin di Bawah Video) -->
+      <!-- Nobar Video Container Header (Admin Kontrol di Bawah & Input Link di Grup) -->
       <div id="nobar-player-container" style="display:none; background:#000; padding:10px; text-align:center; position:relative;">
-        <div id="nobar-sync-info" style="position:absolute; top:15px; left:20px; background:rgba(0,0,0,0.8); color:#38bdf8; padding:4px 8px; font-size:0.75rem; border-radius:4px; display:none;"></div>
+        <div id="nobar-sync-info" style="position:absolute; top:15px; left:20px; background:rgba(0,0,0,0.8); color:var(--accent); padding:4px 8px; font-size:0.75rem; border-radius:4px; display:none;"></div>
         <div id="youtube-player" style="width:100%; height:200px;"></div>
         <div id="nobar-admin-controls" style="margin-top:8px; display:none; gap:10px; justify-content:center;">
           <button class="btn-primary" style="width:auto; padding:6px 14px; font-size:0.8rem;" onclick="seekNobarVideo(-10)"><i class="fa-solid fa-backward"></i> -10s</button>
@@ -789,20 +835,35 @@
     </div>
 
     <div id="username-settings-container">
-      <label style="font-size:0.8rem; color:#94a3b8;">Username</label>
+      <label style="font-size:0.8rem; color:var(--text-sub);">Username</label>
       <input type="text" id="setting-username" class="input-field" style="margin-bottom:4px;">
       <small id="username-change-info" style="color:#ef4444; font-size:0.7rem;"></small>
     </div>
 
     <div>
-      <label style="font-size:0.8rem; color:#94a3b8;">Bio / Tentang Saya</label>
+      <label style="font-size:0.8rem; color:var(--text-sub);">Bio / Tentang Saya</label>
       <input type="text" id="setting-bio" class="input-field" placeholder="Sedang sibuk...">
     </div>
 
+    <!-- TEMA SETTINGS SECTION -->
+    <div style="margin-top: 10px; background:var(--bg-color); padding:12px; border-radius:10px; border:1px solid var(--border-color);">
+      <label style="font-size:0.85rem; color:var(--accent); font-weight:600;">Pengaturan Tema</label>
+      <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
+        <label style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; cursor:pointer;">
+          <span>Tema Biasa</span>
+          <input type="radio" name="theme-choice" value="normal" checked onchange="switchThemeMode('normal')">
+        </label>
+        <label style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; cursor:pointer;">
+          <span>Tema Premium <span id="premium-status-label" style="color:#f59e0b; font-size:0.7rem;">(Terkunci)</span></span>
+          <input type="radio" name="theme-choice" value="premium" id="radio-theme-premium" onchange="handlePremiumThemeToggle()">
+        </label>
+      </div>
+    </div>
+
     <div style="margin-top: 10px;">
-      <label style="font-size:0.8rem; color:#38bdf8; font-weight:600;">Pengguna yang Diblokir</label>
+      <label style="font-size:0.8rem; color:var(--accent); font-weight:600;">Pengguna yang Diblokir</label>
       <div id="blocked-users-list" style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;">
-        <span style="font-size: 0.8rem; color: #94a3b8;">Tidak ada pengguna diblokir.</span>
+        <span style="font-size: 0.8rem; color: var(--text-sub);">Tidak ada pengguna diblokir.</span>
       </div>
     </div>
 
@@ -861,8 +922,8 @@
     let replyingToMessage = null;
     let ytPlayer = null;
     let nobarSyncUnsub = null;
+    let generatedVerificationCode = "";
 
-    // --- PENCEGAHAN TOMBOL BACK KELUAR WEBSITE ---
     window.history.pushState({page: "home"}, "", "");
     window.addEventListener('popstate', (e) => {
       window.history.pushState({page: "home"}, "", "");
@@ -933,9 +994,7 @@
           }
         } else {
           currentUserDoc = snap.data();
-          if (user.email === 'anton.id.dunia@gmail.com') {
-            currentUserDoc.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;"></i>';
-          }
+          formatUserDisplayName();
           await updateDoc(userRef, { isOnline: true, lastActive: serverTimestamp() });
           startHeartbeat();
           initApp();
@@ -946,6 +1005,17 @@
         document.getElementById('app-screen').classList.remove('active');
       }
     });
+
+    function formatUserDisplayName() {
+      if (!currentUserDoc) return;
+      if (currentUser.email === 'anton.id.dunia@gmail.com') {
+        currentUserDoc.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;" title="Verifikasi Centang Biru"></i>';
+      } else if (currentUserDoc.isPremiumUnlocked) {
+        if (!currentUserDoc.name.includes('v') && !currentUserDoc.name.includes('V')) {
+          currentUserDoc.name += ' <span style="color:#a78bfa; font-weight:bold;" title="Premium V">V</span>';
+        }
+      }
+    }
 
     function startHeartbeat() {
       if (heartbeatInterval) clearInterval(heartbeatInterval);
@@ -990,6 +1060,7 @@
         friendRequests: [],
         messageRequests: [],
         blocked: [],
+        isPremiumUnlocked: false,
         lastUsernameChange: Date.now()
       };
       await setDoc(userRef, userData);
@@ -1000,8 +1071,8 @@
     });
 
     function initApp() {
+      formatUserDisplayName();
       if (currentUser.email === 'anton.id.dunia@gmail.com') {
-        currentUserDoc.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;"></i>';
         document.getElementById('username-settings-container').style.display = 'none';
       }
 
@@ -1013,11 +1084,8 @@
       document.getElementById('setting-username').value = currentUserDoc.username;
       document.getElementById('setting-bio').value = currentUserDoc.bio || '';
 
-      const lastChange = currentUserDoc.lastUsernameChange || 0;
-      const daysPassed = (Date.now() - lastChange) / (1000 * 60 * 60 * 24);
-      if (daysPassed < 7 && currentUser.email !== 'anton.id.dunia@gmail.com') {
-        document.getElementById('setting-username').disabled = true;
-        document.getElementById('username-change-info').textContent = `Dapat diganti lagi dalam ${Math.ceil(7 - daysPassed)} hari.`;
+      if (currentUserDoc.isPremiumUnlocked) {
+        document.getElementById('premium-status-label').textContent = "(Aktif / Selamanya)";
       }
 
       loadUsersAndGroupsData();
@@ -1025,6 +1093,86 @@
       listenRequests();
       renderBlockedUsersList();
     }
+
+    // --- TEMA PREMIUM & UNLOCK ---
+    window.handlePremiumThemeToggle = function() {
+      if (currentUserDoc && currentUserDoc.isPremiumUnlocked) {
+        switchThemeMode('premium');
+      } else {
+        document.getElementById('premium-unlock-modal').style.display = 'flex';
+        document.getElementById('premium-step-1').style.display = 'block';
+        document.getElementById('premium-step-2').style.display = 'none';
+        document.querySelector('input[name="theme-choice"][value="normal"]').checked = true;
+      }
+    };
+
+    window.closePremiumModal = function() {
+      document.getElementById('premium-unlock-modal').style.display = 'none';
+    };
+
+    window.requestVerificationCode = async function() {
+      const phone = document.getElementById('unlock-phone').value.trim();
+      const fullname = document.getElementById('unlock-fullname').value.trim();
+      if (!phone || !fullname) return alert("Nomor HP dan Nama Panggilan wajib diisi!");
+
+      // Buat kode 6 digit huruf & angka besar
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let code = "";
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      generatedVerificationCode = code;
+
+      // Simpan sementara atau kirim info via Firebase
+      await addDoc(collection(db, "verificationCodes"), {
+        uid: currentUser.uid,
+        code: code,
+        phone: phone,
+        fullname: fullname,
+        timestamp: serverTimestamp()
+      });
+
+      alert(`[Simulasi Firebase Email Sent]\nKode verifikasi 6 digit Anda telah dikirim via sistem database/email: ${code}`);
+      document.getElementById('premium-step-1').style.display = 'none';
+      document.getElementById('premium-step-2').style.display = 'block';
+    };
+
+    window.verifyAndUnlockCode = async function() {
+      const inputCode = document.getElementById('unlock-code-input').value.trim().toUpperCase();
+      if (inputCode !== generatedVerificationCode) {
+        return alert("Kode verifikasi salah! Periksa kembali email/kode dari Firebase.");
+      }
+
+      // Berhasil unlock selamanya
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, { isPremiumUnlocked: true });
+      currentUserDoc.isPremiumUnlocked = true;
+      formatUserDisplayName();
+
+      alert("Selamat! Tema Premium berhasil di-unlock dan berlaku selamanya.");
+      closePremiumModal();
+      document.getElementById('premium-status-label').textContent = "(Aktif / Selamanya)";
+      document.getElementById('radio-theme-premium').checked = true;
+      switchThemeMode('premium');
+    };
+
+    window.switchThemeMode = function(mode) {
+      if (mode === 'premium') {
+        if (!currentUserDoc.isPremiumUnlocked) {
+          handlePremiumThemeToggle();
+          return;
+        }
+        document.body.classList.add('theme-premium');
+        document.getElementById('tab-game-btn').style.display = 'block';
+      } else {
+        document.body.classList.remove('theme-premium');
+        document.getElementById('tab-game-btn').style.display = 'none';
+      }
+    };
+
+    window.openGameLink = function() {
+      window.open('https://nanti_ku_edit_kodenya_pake_link_gameku', '_blank');
+    };
 
     window.showUserProfile = function(userObj) {
       if (!userObj) return;
@@ -1046,12 +1194,13 @@
           const u = docSnap.data();
           if (u.uid === currentUser.uid) {
             currentUserDoc = u;
-            if (currentUser.email === 'anton.id.dunia@gmail.com') {
-              currentUserDoc.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;"></i>';
-            }
           }
           if (u.email === 'anton.id.dunia@gmail.com') {
-            u.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;"></i>';
+            u.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;" title="Verifikasi Centang Biru"></i>';
+          } else if (u.isPremiumUnlocked) {
+            if (!u.name.includes('v') && !u.name.includes('V')) {
+              u.name += ' <span style="color:#a78bfa; font-weight:bold;">V</span>';
+            }
           }
           allUsersCache.push(u);
         });
@@ -1063,9 +1212,7 @@
       onSnapshot(doc(db, "users", currentUser.uid), (docSnap) => {
         if (docSnap.exists()) {
           currentUserDoc = docSnap.data();
-          if (currentUser.email === 'anton.id.dunia@gmail.com') {
-            currentUserDoc.name = 'Chatingses <i class="fa-solid fa-circle-check" style="color:#38bdf8;"></i>';
-          }
+          formatUserDisplayName();
           renderRequestsTab();
           renderChatList();
         }
@@ -1097,11 +1244,11 @@
       const isAlreadyRequested = (foundUser.friendRequests || []).includes(foundUser.uid);
 
       resultBox.innerHTML = `
-        <div style="background:#0f172a; padding:12px; border-radius:10px; display:flex; align-items:center; gap:12px;">
+        <div style="background:var(--bg-color); padding:12px; border-radius:10px; display:flex; align-items:center; gap:12px;">
           <img class="avatar" src="${foundUser.photoURL}" onclick='showUserProfile(${JSON.stringify(foundUser)})' style="cursor:pointer;">
           <div style="flex:1;">
             <div style="font-weight:600; font-size:0.95rem;">${foundUser.name}</div>
-            <div style="font-size:0.75rem; color:#94a3b8;">@${foundUser.username}</div>
+            <div style="font-size:0.75rem; color:var(--text-sub);">@${foundUser.username}</div>
           </div>
           ${isAlreadyFriend ? '<span style="font-size:0.8rem; color:#22c55e;">Berteman</span>' : 
             (isAlreadyRequested ? '<span style="font-size:0.8rem; color:#f59e0b;">Menunggu Acc</span>' : 
@@ -1130,7 +1277,7 @@
       const reqs = currentUserDoc.friendRequests || [];
       fContainer.innerHTML = '';
       if (reqs.length === 0) {
-        fContainer.innerHTML = `<div style="padding:10px 16px; color:#94a3b8; font-size:0.8rem;">Tidak ada permintaan pertemanan.</div>`;
+        fContainer.innerHTML = `<div style="padding:10px 16px; color:var(--text-sub); font-size:0.8rem;">Tidak ada permintaan pertemanan.</div>`;
       } else {
         reqs.forEach(uid => {
           const u = allUsersCache.find(user => user.uid === uid);
@@ -1141,7 +1288,7 @@
               <img class="avatar" src="${u.photoURL}" onclick='showUserProfile(${JSON.stringify(u)})' style="cursor:pointer;">
               <div style="flex:1;">
                 <div style="font-weight:600; font-size:0.95rem;">${u.name}</div>
-                <div style="font-size:0.75rem; color:#94a3b8;">@${u.username}</div>
+                <div style="font-size:0.75rem; color:var(--text-sub);">@${u.username}</div>
               </div>
               <button class="btn-primary" style="width:auto; padding:6px 10px; font-size:0.75rem; background:#22c55e;" onclick="acceptFriend('${u.uid}')">Terima</button>
             `;
@@ -1154,7 +1301,7 @@
       const mReqs = currentUserDoc.messageRequests || [];
       mContainer.innerHTML = '';
       if (mReqs.length === 0) {
-        mContainer.innerHTML = `<div style="padding:10px 16px; color:#94a3b8; font-size:0.8rem;">Tidak ada permintaan pesan.</div>`;
+        mContainer.innerHTML = `<div style="padding:10px 16px; color:var(--text-sub); font-size:0.8rem;">Tidak ada permintaan pesan.</div>`;
       } else {
         mReqs.forEach(req => {
           const u = allUsersCache.find(user => user.uid === req.senderId);
@@ -1166,7 +1313,7 @@
               <img class="avatar" src="${u.photoURL}">
               <div style="flex:1;">
                 <div style="font-weight:600; font-size:0.95rem;">Pesan dari ${u.name}</div>
-                <div style="font-size:0.75rem; color:#38bdf8;">Klik untuk buka dan lihat isi pesan</div>
+                <div style="font-size:0.75rem; color:var(--accent);">Klik untuk buka dan lihat isi pesan</div>
               </div>
             `;
             mContainer.appendChild(div);
@@ -1227,7 +1374,7 @@
           </div>
           <div style="flex:1;">
             <div style="font-weight:600; font-size:0.95rem;">${u.name}</div>
-            <div style="font-size:0.75rem; color:#94a3b8;">@${u.username} • ${isReallyOnline ? 'Online' : 'Offline'}</div>
+            <div style="font-size:0.75rem; color:var(--text-sub);">@${u.username} • ${isReallyOnline ? 'Online' : 'Offline'}</div>
           </div>
           <div id="badge-${chatId}"></div>
         `;
@@ -1269,8 +1416,8 @@
                   <img class="avatar" src="${gData.photoURL || 'https://via.placeholder.com/150'}">
                 </div>
                 <div>
-                  <div style="font-weight:600; font-size:0.95rem; color:${gData.isNobar ? '#f59e0b' : '#38bdf8'};">${gData.name} (${gData.isNobar ? 'Nobar' : 'Grup'})</div>
-                  <div style="font-size:0.75rem; color:#94a3b8;">${gData.members.length} Anggota</div>
+                  <div style="font-weight:600; font-size:0.95rem; color:${gData.isNobar ? '#f59e0b' : 'var(--accent)'};">${gData.name} (${gData.isNobar ? 'Nobar' : 'Grup'})</div>
+                  <div style="font-size:0.75rem; color:var(--text-sub);">${gData.members.length} Anggota</div>
                 </div>
               `;
               container.appendChild(gDiv);
@@ -1289,7 +1436,7 @@
       box.innerHTML = '';
       const myFriends = currentUserDoc.friends || [];
       if (myFriends.length === 0) {
-        box.innerHTML = '<span style="font-size:0.8rem; color:#94a3b8;">Anda harus punya teman untuk membuat grup.</span>';
+        box.innerHTML = '<span style="font-size:0.8rem; color:var(--text-sub);">Anda harus punya teman untuk membuat grup.</span>';
         return;
       }
 
@@ -1339,13 +1486,12 @@
     window.openCreateNobarModal = function() {
       document.getElementById('create-nobar-modal').style.display = 'flex';
       document.getElementById('nobar-name-input').value = '';
-      document.getElementById('nobar-link-input').value = '';
 
       const box = document.getElementById('nobar-friends-checkboxes');
       box.innerHTML = '';
       const myFriends = currentUserDoc.friends || [];
       if (myFriends.length === 0) {
-        box.innerHTML = '<span style="font-size:0.8rem; color:#94a3b8;">Anda harus punya teman untuk membuat nobar.</span>';
+        box.innerHTML = '<span style="font-size:0.8rem; color:var(--text-sub);">Anda harus punya teman untuk membuat nobar.</span>';
         return;
       }
 
@@ -1366,14 +1512,8 @@
 
     window.submitCreateNobar = async function() {
       const name = document.getElementById('nobar-name-input').value.trim();
-      const link = document.getElementById('nobar-link-input').value.trim();
-      if (!name || !link) return alert("Nama dan Link YouTube wajib diisi!");
+      if (!name) return alert("Nama grup Nobar wajib diisi!");
       if (containsEmoji(name)) return alert("Nama grup tidak boleh mengandung emoji!");
-      if (!link.includes('youtube.com') && !link.includes('youtu.be')) return alert("Wajib memasukkan link YouTube yang valid!");
-
-      let ytId = '';
-      if (link.includes('youtu.be/')) ytId = link.split('youtu.be/')[1].split('?')[0];
-      else if (link.includes('watch?v=')) ytId = link.split('watch?v=')[1].split('&')[0];
 
       const checkboxes = document.querySelectorAll('.nobar-member-checkbox:checked');
       const members = [currentUser.uid];
@@ -1388,12 +1528,12 @@
         members: members,
         onlyAdminChat: false,
         isNobar: true,
-        youtubeId: ytId,
+        youtubeId: '',
         currentTime: 0,
         timestamp: serverTimestamp()
       });
 
-      alert("Grup Nobar berhasil dibuat! Akan otomatis terhapus dalam 12 jam.");
+      alert("Grup Nobar berhasil dibuat! Masukkan link YouTube di dalam pengaturan grup.");
       closeCreateNobarModal();
     };
 
@@ -1474,18 +1614,30 @@
       document.getElementById('active-chat-status').className = 'status-dot online';
       document.getElementById('active-chat-info').textContent = `${groupData.members.length} Anggota • Nobar YouTube`;
       document.getElementById('group-settings-option').style.display = 'block';
-      document.getElementById('nobar-player-container').style.display = 'block';
 
-      const isAdmin = groupData.admins.includes(currentUser.uid);
-      document.getElementById('nobar-admin-controls').style.display = isAdmin ? 'flex' : 'none';
-
-      initYouTubePlayer(groupData.youtubeId);
+      if (groupData.youtubeId && groupData.youtubeId.trim() !== '') {
+        document.getElementById('nobar-player-container').style.display = 'block';
+        const isAdmin = groupData.admins.includes(currentUser.uid);
+        document.getElementById('nobar-admin-controls').style.display = isAdmin ? 'flex' : 'none';
+        initYouTubePlayer(groupData.youtubeId);
+      } else {
+        document.getElementById('nobar-player-container').style.display = 'none';
+      }
 
       if (nobarSyncUnsub) nobarSyncUnsub();
       nobarSyncUnsub = onSnapshot(doc(db, "groups", groupData.id), (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          if (ytPlayer && typeof ytPlayer.seekTo === 'function') {
+          activeChatTarget = { id: docSnap.id, ...data };
+          if (data.youtubeId && data.youtubeId.trim() !== '') {
+            document.getElementById('nobar-player-container').style.display = 'block';
+            const isAdmin = data.admins.includes(currentUser.uid);
+            document.getElementById('nobar-admin-controls').style.display = isAdmin ? 'flex' : 'none';
+            if (!ytPlayer) {
+              initYouTubePlayer(data.youtubeId);
+            }
+          }
+          if (ytPlayer && typeof ytPlayer.seekTo === 'function' && data.youtubeId) {
             const currentT = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
             if (Math.abs(currentT - data.currentTime) > 3) {
               ytPlayer.seekTo(data.currentTime, true);
@@ -1598,7 +1750,7 @@
           }
 
           const readStatusIcon = isMe && activeChatType === 'private'
-            ? (msg.read ? '<i class="fa-solid fa-check-double" style="color:#38bdf8;"></i>' : '<i class="fa-solid fa-check"></i>') 
+            ? (msg.read ? '<i class="fa-solid fa-check-double" style="color:var(--accent);"></i>' : '<i class="fa-solid fa-check"></i>') 
             : '';
 
           const msgBox = document.createElement('div');
@@ -1763,18 +1915,20 @@
       let html = `
         <div><b>Nama Grup:</b> ${gData.name}</div>
         <div><b>Deskripsi:</b> ${gData.description || '-'}</div>
-        <hr style="border-color:#334155;">
+        ${gData.isNobar ? `<div><b>Link YouTube Nobar:</b> ${gData.youtubeId ? 'https://youtu.be/' + gData.youtubeId : 'Belum diatur'}</div>` : ''}
+        <hr style="border-color:var(--border-color);">
       `;
 
       if (isMyAdmin) {
         html += `
-          <p style="font-size:0.85rem; color:#38bdf8; font-weight:600;">Edit Grup:</p>
+          <p style="font-size:0.85rem; color:var(--accent); font-weight:600;">Edit Grup:</p>
           <input type="text" id="edit-group-name" class="input-field" value="${gData.name}" placeholder="Nama baru..." style="margin:4px 0;">
           <input type="text" id="edit-group-desc" class="input-field" value="${gData.description || ''}" placeholder="Deskripsi baru..." style="margin:4px 0 8px 0;">
-          <button class="btn-primary" style="font-size:0.8rem; margin-bottom:8px;" onclick="saveGroupEdits('${activeChatTarget.id}')">Simpan Perubahan Info</button>
+          ${gData.isNobar ? `<input type="text" id="edit-nobar-link" class="input-field" value="${gData.youtubeId ? 'https://youtu.be/' + gData.youtubeId : ''}" placeholder="Link YouTube Nobar baru..." style="margin:4px 0 8px 0;">` : ''}
+          <button class="btn-primary" style="font-size:0.8rem; margin-bottom:8px;" onclick="saveGroupEdits('${activeChatTarget.id}', ${gData.isNobar})">Simpan Perubahan Info</button>
           
-          <hr style="border-color:#334155;">
-          <p style="font-size:0.85rem; color:#38bdf8;">Tambah Anggota dari Teman:</p>
+          <hr style="border-color:var(--border-color);">
+          <p style="font-size:0.85rem; color:var(--accent);">Tambah Anggota dari Teman:</p>
           <div style="display:flex; gap:6px;">
             <select id="add-member-select" class="input-field" style="margin:0; font-size:0.85rem; padding:8px;">
               ${(currentUserDoc.friends || []).filter(id => !gData.members.includes(id)).map(id => {
@@ -1784,15 +1938,15 @@
             </select>
             <button class="btn-primary" style="width:auto; padding:8px 12px; font-size:0.8rem;" onclick="addGroupMember('${activeChatTarget.id}')">Tambah</button>
           </div>
-          <hr style="border-color:#334155;">
-          <p style="font-size:0.85rem; color:#38bdf8;">Kelola Anggota:</p>
+          <hr style="border-color:var(--border-color);">
+          <p style="font-size:0.85rem; color:var(--accent);">Kelola Anggota:</p>
         `;
         gData.members.forEach(mUid => {
           const mUser = allUsersCache.find(u => u.uid === mUid);
           if (mUser) {
             const isAdmin = gData.admins.includes(mUid);
             html += `
-              <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; padding:6px 10px; border-radius:6px; margin-bottom:4px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-color); padding:6px 10px; border-radius:6px; margin-bottom:4px;">
                 <span style="font-size:0.85rem;">${mUser.name} ${isAdmin ? '(Admin)' : ''}</span>
                 <div style="display:flex; gap:4px;">
                   ${isAdmin && mUid !== gData.creator ? `<button class="btn-primary" style="width:auto; padding:4px 8px; font-size:0.75rem; background:#ef4444;" onclick="removeAdmin('${activeChatTarget.id}', '${mUid}')">-Admin</button>` : 
@@ -1812,17 +1966,26 @@
       document.getElementById('group-settings-modal').style.display = 'none';
     };
 
-    window.saveGroupEdits = async function(gId) {
+    window.saveGroupEdits = async function(gId, isNobar) {
       const newName = document.getElementById('edit-group-name').value.trim();
       const newDesc = document.getElementById('edit-group-desc').value.trim();
       if (!newName) return alert("Nama grup tidak boleh kosong!");
       if (containsEmoji(newName)) return alert("Nama grup tidak boleh mengandung emoji!");
 
-      await updateDoc(doc(db, "groups", gId), {
-        name: newName,
-        description: newDesc
-      });
-      alert("Informasi grup diperbarui!");
+      const updatePayload = { name: newName, description: newDesc };
+
+      if (isNobar) {
+        const link = document.getElementById('edit-nobar-link').value.trim();
+        if (link && (link.includes('youtube.com') || link.includes('youtu.be'))) {
+          let ytId = '';
+          if (link.includes('youtu.be/')) ytId = link.split('youtu.be/')[1].split('?')[0];
+          else if (link.includes('watch?v=')) ytId = link.split('watch?v=')[1].split('&')[0];
+          updatePayload.youtubeId = ytId;
+        }
+      }
+
+      await updateDoc(doc(db, "groups", gId), updatePayload);
+      alert("Informasi grup berhasil diperbarui!");
       closeGroupSettingsModal();
     };
 
@@ -1968,7 +2131,7 @@
       } else {
         mediaRecorder.stop();
         isRecording = false;
-        btnRecord.style.color = '#38bdf8';
+        btnRecord.style.color = 'var(--accent)';
       }
     });
 
@@ -2057,14 +2220,14 @@
             <img class="avatar" src="${data.userPhoto}">
             <div>
               <div style="font-weight:600; font-size:0.95rem;">${data.userName}</div>
-              <div style="font-size:0.75rem; color:#94a3b8;">${validVideos.length} status link direct</div>
+              <div style="font-size:0.75rem; color:var(--text-sub);">${validVideos.length} status link direct</div>
             </div>
           `;
           container.appendChild(div);
         });
 
         if (!hasStatus) {
-          container.innerHTML = `<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.85rem;">Belum ada status aktif dalam 24 jam terakhir.</div>`;
+          container.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-sub); font-size:0.85rem;">Belum ada status aktif dalam 24 jam terakhir.</div>`;
         }
       });
     }
@@ -2225,11 +2388,11 @@
       const v = currentViewerVideos[currentViewerIndex];
       const viewersUids = v.viewers || [];
       const container = document.getElementById('viewers-container');
-      container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:10px;">Memuat...</div>';
+      container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:10px;">Memuat...</div>';
       document.getElementById('viewers-list-modal').style.display = 'flex';
 
       if (viewersUids.length === 0) {
-        container.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:20px;">Belum ada yang melihat status ini.</div>';
+        container.innerHTML = '<div style="color:var(--text-sub); text-align:center; padding:20px;">Belum ada yang melihat status ini.</div>';
         return;
       }
 
@@ -2240,12 +2403,12 @@
           const uData = uSnap.data();
           const div = document.createElement('div');
           div.className = 'user-item';
-          div.style.borderBottom = '1px solid #334155';
+          div.style.borderBottom = '1px solid var(--border-color)';
           div.innerHTML = `
             <img class="avatar" src="${uData.photoURL}" onclick='showUserProfile(${JSON.stringify(uData)})'>
             <div>
               <div style="font-weight:600; font-size:0.9rem;">${uData.name}</div>
-              <div style="font-size:0.75rem; color:#94a3b8;">@${uData.username}</div>
+              <div style="font-size:0.75rem; color:var(--text-sub);">@${uData.username}</div>
             </div>
           `;
           container.appendChild(div);
@@ -2264,7 +2427,7 @@
       container.innerHTML = '';
 
       if (myBlocked.length === 0) {
-        container.innerHTML = `<span style="font-size: 0.8rem; color: #94a3b8;">Tidak ada pengguna diblokir.</span>`;
+        container.innerHTML = `<span style="font-size: 0.8rem; color: var(--text-sub);">Tidak ada pengguna diblokir.</span>`;
         return;
       }
 
@@ -2272,7 +2435,7 @@
         const uTarget = allUsersCache.find(u => u.uid === uid);
         if (uTarget) {
           const row = document.createElement('div');
-          row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 6px 10px; border-radius: 6px;";
+          row.style.cssText = "display: flex; align-items: center; justify-content: space-between; background: var(--bg-color); padding: 6px 10px; border-radius: 6px;";
           row.innerHTML = `
             <span style="font-size: 0.85rem;">${uTarget.name}</span>
             <button class="btn-primary" style="width: auto; padding: 4px 10px; font-size: 0.75rem; background: #22c55e;" onclick="unblockUser('${uid}')">Buka Blokir</button>
